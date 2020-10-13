@@ -1,0 +1,2 @@
+# template
+go web template
