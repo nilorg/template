@@ -8,6 +8,11 @@ import (
 )
 
 func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
+	// 加载局部页面
+	partials, err := filepath.Glob(filepath.Join(templatesDir, "partials/*.tmpl"))
+	if err != nil {
+		panic(err)
+	}
 	// 加载布局
 	layouts, err := filepath.Glob(filepath.Join(templatesDir, "layouts/*.tmpl"))
 	if err != nil {
@@ -20,12 +25,11 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 	}
 	for _, errPage := range errors {
 		tmplName := fmt.Sprintf("error/%s", filepath.Base(errPage))
-		r.AddFromFilesFuncs(tmplName, funcMap, errPage)
-	}
-	// 加载局部页面
-	partials, err := filepath.Glob(filepath.Join(templatesDir, "partials/*.tmpl"))
-	if err != nil {
-		panic(err)
+		files := []string{
+			errPage,
+		}
+		files = append(files, partials...)
+		r.AddFromFilesFuncs(tmplName, funcMap, files...)
 	}
 
 	// 页面文件夹
@@ -61,7 +65,11 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 	}
 	for _, singlePage := range singles {
 		tmplName := fmt.Sprintf("singles/%s", filepath.Base(singlePage))
-		r.AddFromFilesFuncs(tmplName, funcMap, singlePage)
+		files := []string{
+			singlePage,
+		}
+		files = append(files, partials...)
+		r.AddFromFilesFuncs(tmplName, funcMap, files...)
 	}
 }
 
