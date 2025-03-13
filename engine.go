@@ -1,6 +1,7 @@
 package template
 
 import (
+	"embed"
 	"fmt"
 	"io"
 	"os"
@@ -12,15 +13,21 @@ import (
 // LoadTemplateFunc 加载模板函数类
 type LoadTemplateFunc func(templatesDir string, funcMap FuncMap) Render
 
+// LoadEmbedFSTemplateFunc 加载模板函数类
+type LoadEmbedFSTemplateFunc func(tmplFS *embed.FS, tmplFSSUbDir string, funcMap FuncMap) Render
+
 // Engine 模板引擎
 type Engine struct {
-	templatesDir     string
-	watcher          *fsnotify.Watcher
-	Errors           <-chan error
-	loadTemplateFunc LoadTemplateFunc
-	FuncMap          FuncMap
-	HTMLRender       Render
-	opts             Options
+	templatesDir        string
+	tmplFS              *embed.FS
+	tmplFSSUbDir        string
+	watcher             *fsnotify.Watcher
+	Errors              <-chan error
+	loadTemplateFunc    LoadTemplateFunc
+	loadTemplateEmbedFS LoadEmbedFSTemplateFunc
+	FuncMap             FuncMap
+	HTMLRender          Render
+	opts                Options
 }
 
 // NewEngine 创建一个gin引擎模板
@@ -39,6 +46,17 @@ func NewEngine(templateDir string, tmplFunc LoadTemplateFunc, funcMap FuncMap, o
 	}, nil
 }
 
+func NewEngineWithEmbedFS(tmplFS *embed.FS, tmplFSSUbDir string, tmplFunc LoadEmbedFSTemplateFunc, funcMap FuncMap, opts ...Option) (*Engine, error) {
+	return &Engine{
+		tmplFS:              tmplFS,
+		tmplFSSUbDir:        tmplFSSUbDir,
+		loadTemplateEmbedFS: tmplFunc,
+		Errors:              make(<-chan error),
+		FuncMap:             funcMap,
+		opts:                newOptions(opts...),
+	}, nil
+}
+
 // Init 初始化
 func (en *Engine) Init() {
 	en.HTMLRender = en.loadTemplate()
@@ -46,6 +64,12 @@ func (en *Engine) Init() {
 
 // Watching 监听模板文件夹中是否有变动
 func (en *Engine) Watching() error {
+	if en.templatesDir == "" {
+		return fmt.Errorf("template directory is empty")
+	}
+	if en.watcher == nil {
+		return fmt.Errorf("watcher is nil")
+	}
 	en.Errors = en.watcher.Errors
 
 	go func() {
@@ -90,12 +114,19 @@ func (en *Engine) Watching() error {
 
 // Close 关闭
 func (en *Engine) Close() error {
+	if en.watcher == nil {
+		return nil
+	}
 	return en.watcher.Close()
 }
 
 // loadTemplate 加载模板
 func (en *Engine) loadTemplate() Render {
-	return en.loadTemplateFunc(en.templatesDir, en.FuncMap)
+	if en.templatesDir != "" {
+		return en.loadTemplateFunc(en.templatesDir, en.FuncMap)
+	} else {
+		return en.loadTemplateEmbedFS(en.tmplFS, en.tmplFSSUbDir, en.FuncMap)
+	}
 }
 
 // PageName 页面

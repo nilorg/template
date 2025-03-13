@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"path/filepath"
 )
 
@@ -46,6 +47,14 @@ func (r Render) Add(name string, tmpl *template.Template) error {
 func (r Render) AddFromFilesFuncs(name string, funcMap FuncMap, files ...string) *template.Template {
 	tname := filepath.Base(files[0])
 	tmpl := template.Must(template.New(tname).Funcs(template.FuncMap(funcMap)).ParseFiles(files...))
+	r.Add(name, tmpl)
+	return tmpl
+}
+
+// AddFromFSFuncs supply add template from fs callback func
+func (r Render) AddFromFSFuncs(name string, funcMap FuncMap, fs fs.FS, files ...string) *template.Template {
+	tname := filepath.Base(files[0])
+	tmpl := template.Must(template.New(tname).Funcs(template.FuncMap(funcMap)).ParseFS(fs, files...))
 	r.Add(name, tmpl)
 	return tmpl
 }
