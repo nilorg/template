@@ -136,31 +136,31 @@ func (en *Engine) PageName(name string) string {
 
 // SingleName 单页
 func (en *Engine) SingleName(name string) string {
-	return fmt.Sprintf("singles/%s.tmpl", name)
+	return fmt.Sprintf("singles/%s.%s", name, en.opts.Suffix)
 }
 
 // ErrorName 单页
 func (en *Engine) ErrorName(name string) string {
-	return fmt.Sprintf("error/%s.tmpl", name)
+	return fmt.Sprintf("error/%s.%s", name, en.opts.Suffix)
 }
 
 // RenderPage 渲染页面
-func (en *Engine) RenderPage(w io.Writer, name string, data H, opts ...Option) {
-	en.render(w, name, "page", data, opts...)
+func (en *Engine) RenderPage(w io.Writer, name string, data H, opts ...Option) error {
+	return en.render(w, name, "page", data, opts...)
 }
 
 // RenderSingle 渲染单页面
-func (en *Engine) RenderSingle(w io.Writer, name string, data H, opts ...Option) {
-	en.render(w, name, "single", data, opts...)
+func (en *Engine) RenderSingle(w io.Writer, name string, data H, opts ...Option) error {
+	return en.render(w, name, "single", data, opts...)
 }
 
 // RenderError 渲染错误页面
-func (en *Engine) RenderError(w io.Writer, name string, data H, opts ...Option) {
-	en.render(w, name, "error", data, opts...)
+func (en *Engine) RenderError(w io.Writer, name string, data H, opts ...Option) error {
+	return en.render(w, name, "error", data, opts...)
 }
 
 // render 渲染
-func (en *Engine) render(w io.Writer, name, typ string, data H, opts ...Option) {
+func (en *Engine) render(w io.Writer, name, typ string, data H, opts ...Option) error {
 	opt := en.opts
 	for _, o := range opts {
 		o(&opt)
@@ -173,10 +173,12 @@ func (en *Engine) render(w io.Writer, name, typ string, data H, opts ...Option) 
 	data["variable"] = en.opts.GlobalVariable
 	switch typ {
 	case "page":
-		en.HTMLRender.Execute(en.PageName(name), w, data)
+		return en.HTMLRender.Execute(en.PageName(name), w, data)
 	case "single":
-		en.HTMLRender.Execute(en.SingleName(name), w, data)
+		return en.HTMLRender.Execute(en.SingleName(name), w, data)
 	case "error":
-		en.HTMLRender.Execute(en.ErrorName(name), w, data)
+		return en.HTMLRender.Execute(en.ErrorName(name), w, data)
+	default:
+		return fmt.Errorf("unknown render type: %s", typ)
 	}
 }

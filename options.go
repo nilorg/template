@@ -8,6 +8,7 @@ type Options struct {
 	Layout         string
 	GlobalVariable map[string]interface{}
 	GlobalConstant map[string]interface{}
+	Suffix         string
 }
 
 // newOptions 创建可选参数
@@ -17,6 +18,7 @@ func newOptions(opts ...Option) Options {
 		Layout:         "layout.tmpl",
 		GlobalVariable: map[string]interface{}{},
 		GlobalConstant: map[string]interface{}{},
+		Suffix:         "tmpl",
 	}
 	for _, o := range opts {
 		o(&opt)
@@ -52,5 +54,11 @@ func GlobalVariable(variable map[string]interface{}) Option {
 func GlobalConstant(constant map[string]interface{}) Option {
 	return func(o *Options) {
 		o.GlobalConstant = constant
+	}
+}
+
+func Suffix(suffix string) Option {
+	return func(o *Options) {
+		o.Suffix = suffix
 	}
 }
