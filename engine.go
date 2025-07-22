@@ -131,17 +131,32 @@ func (en *Engine) loadTemplate() Render {
 
 // PageName 页面
 func (en *Engine) PageName(name string) string {
-	return fmt.Sprintf("%s:pages/%s", en.opts.Layout, name)
+	return en.PageNameWithOptions(name, en.opts)
+}
+
+// PageNameWithOptions 页面（带选项）
+func (en *Engine) PageNameWithOptions(name string, opts Options) string {
+	return fmt.Sprintf("%s:pages/%s", opts.Layout, name)
 }
 
 // SingleName 单页
 func (en *Engine) SingleName(name string) string {
-	return fmt.Sprintf("singles/%s.%s", name, en.opts.Suffix)
+	return en.SingleNameWithOptions(name, en.opts)
+}
+
+// SingleNameWithOptions 单页（带选项）
+func (en *Engine) SingleNameWithOptions(name string, opts Options) string {
+	return fmt.Sprintf("singles/%s.%s", name, opts.Suffix)
 }
 
 // ErrorName 单页
 func (en *Engine) ErrorName(name string) string {
-	return fmt.Sprintf("error/%s.%s", name, en.opts.Suffix)
+	return en.ErrorNameWithOptions(name, en.opts)
+}
+
+// ErrorNameWithOptions 错误页面（带选项）
+func (en *Engine) ErrorNameWithOptions(name string, opts Options) string {
+	return fmt.Sprintf("error/%s.%s", name, opts.Suffix)
 }
 
 // RenderPage 渲染页面
@@ -169,15 +184,15 @@ func (en *Engine) render(w io.Writer, name, typ string, data H, opts ...Option) 
 	if data == nil {
 		data = H{}
 	}
-	data["constant"] = en.opts.GlobalConstant
-	data["variable"] = en.opts.GlobalVariable
+	data["constant"] = opt.GlobalConstant
+	data["variable"] = opt.GlobalVariable
 	switch typ {
 	case "page":
-		return en.HTMLRender.Execute(en.PageName(name), w, data)
+		return en.HTMLRender.Execute(en.PageNameWithOptions(name, opt), w, data)
 	case "single":
-		return en.HTMLRender.Execute(en.SingleName(name), w, data)
+		return en.HTMLRender.Execute(en.SingleNameWithOptions(name, opt), w, data)
 	case "error":
-		return en.HTMLRender.Execute(en.ErrorName(name), w, data)
+		return en.HTMLRender.Execute(en.ErrorNameWithOptions(name, opt), w, data)
 	default:
 		return fmt.Errorf("unknown render type: %s", typ)
 	}
