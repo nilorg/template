@@ -4,10 +4,9 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/nilorg/sdk/path"
 )
 
 func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
@@ -38,7 +37,12 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 	// 页面文件夹
 	var pageDirs []string
 	basePagePath := filepath.Join(templatesDir, "pages")
-	err = path.Dirs(basePagePath, &pageDirs)
+	err = filepath.WalkDir(basePagePath, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() && path != basePagePath {
+			pageDirs = append(pageDirs, path)
+		}
+		return nil
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -90,18 +94,19 @@ func DefaultLoadTemplateWithEmbedFS(tmplFS *embed.FS, tmplFSSUbDir string, funcM
 }
 
 func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, funcMap FuncMap) {
+	// embed.FS 总是使用正斜杠路径，使用 path.Join 而不是 filepath.Join
 	// 加载局部页面
-	partials, err := fs.Glob(tmplFS, filepath.Join(tmplFSSUbDir, "partials/*.tmpl"))
+	partials, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "partials/*.tmpl"))
 	if err != nil {
 		panic(err)
 	}
 	// 加载布局
-	layouts, err := fs.Glob(tmplFS, filepath.Join(tmplFSSUbDir, "layouts/*.tmpl"))
+	layouts, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "layouts/*.tmpl"))
 	if err != nil {
 		panic(err)
 	}
 	// 加载错误页面
-	errors, err := fs.Glob(tmplFS, filepath.Join(tmplFSSUbDir, "errors/*.tmpl"))
+	errors, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "errors/*.tmpl"))
 	if err != nil {
 		panic(err)
 	}
@@ -116,7 +121,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 
 	// 页面文件夹
 	var pageDirs []string
-	basePagePath := filepath.Join(tmplFSSUbDir, "pages")
+	basePagePath := path.Join(tmplFSSUbDir, "pages")
 	err = fs.WalkDir(tmplFS, basePagePath, func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() && path != basePagePath {
 			pageDirs = append(pageDirs, path)
@@ -128,7 +133,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 	}
 	for _, pageDir := range pageDirs {
 		for _, layout := range layouts {
-			pageItems, err := fs.Glob(tmplFS, filepath.Join(pageDir, "*.tmpl"))
+			pageItems, err := fs.Glob(tmplFS, path.Join(pageDir, "*.tmpl"))
 			if err != nil {
 				panic(err)
 			}
@@ -146,7 +151,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 		}
 	}
 	// 加载单页面
-	singles, err := fs.Glob(tmplFS, filepath.Join(tmplFSSUbDir, "singles/*.tmpl"))
+	singles, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "singles/*.tmpl"))
 	if err != nil {
 		panic(err)
 	}

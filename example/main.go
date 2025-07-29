@@ -25,7 +25,7 @@ func main() {
 	fmt.Println("=========================")
 	en.RenderSingle(os.Stdout, "login", nil)
 	fmt.Println("=========================")
-	en.RenderPage(os.Stdout, "posts", nil)
+	en.RenderPage(os.Stdout, "posts/list", nil)
 	signal.AwaitExit()
 	en.Close()
 }
