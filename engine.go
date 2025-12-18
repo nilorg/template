@@ -23,6 +23,7 @@ type Engine struct {
 	tmplFSSUbDir        string
 	watcher             *fsnotify.Watcher
 	Errors              <-chan error
+	done                chan struct{}
 	loadTemplateFunc    LoadTemplateFunc
 	loadTemplateEmbedFS LoadEmbedFSTemplateFunc
 	FuncMap             FuncMap
@@ -40,7 +41,7 @@ func NewEngine(templateDir string, tmplFunc LoadTemplateFunc, funcMap FuncMap, o
 		templatesDir:     templateDir,
 		loadTemplateFunc: tmplFunc,
 		watcher:          watcher,
-		Errors:           make(<-chan error),
+		done:             make(chan struct{}),
 		FuncMap:          funcMap,
 		opts:             newOptions(opts...),
 	}, nil
@@ -51,7 +52,6 @@ func NewEngineWithEmbedFS(tmplFS *embed.FS, tmplFSSUbDir string, tmplFunc LoadEm
 		tmplFS:              tmplFS,
 		tmplFSSUbDir:        tmplFSSUbDir,
 		loadTemplateEmbedFS: tmplFunc,
-		Errors:              make(<-chan error),
 		FuncMap:             funcMap,
 		opts:                newOptions(opts...),
 	}, nil
@@ -74,24 +74,31 @@ func (en *Engine) Watching() error {
 
 	go func() {
 		for {
-			event := <-en.watcher.Events
-			loadFlag := true
-			switch event.Op {
-			case fsnotify.Create:
-				fileInfo, err := os.Stat(event.Name)
-				if err == nil && fileInfo.IsDir() {
-					en.watcher.Add(event.Name)
+			select {
+			case <-en.done:
+				return
+			case event, ok := <-en.watcher.Events:
+				if !ok {
+					return
 				}
-			case fsnotify.Remove, fsnotify.Rename:
-				fileInfo, err := os.Stat(event.Name)
-				if err == nil && fileInfo.IsDir() {
-					en.watcher.Remove(event.Name)
+				loadFlag := true
+				switch event.Op {
+				case fsnotify.Create:
+					fileInfo, err := os.Stat(event.Name)
+					if err == nil && fileInfo.IsDir() {
+						en.watcher.Add(event.Name)
+					}
+				case fsnotify.Remove, fsnotify.Rename:
+					fileInfo, err := os.Stat(event.Name)
+					if err == nil && fileInfo.IsDir() {
+						en.watcher.Remove(event.Name)
+					}
+				case fsnotify.Chmod:
+					loadFlag = false
 				}
-			case fsnotify.Chmod:
-				loadFlag = false
-			}
-			if loadFlag {
-				en.HTMLRender = en.loadTemplate()
+				if loadFlag {
+					en.HTMLRender = en.loadTemplate()
+				}
 			}
 		}
 	}()
@@ -114,6 +121,9 @@ func (en *Engine) Watching() error {
 
 // Close 关闭
 func (en *Engine) Close() error {
+	if en.done != nil {
+		close(en.done)
+	}
 	if en.watcher == nil {
 		return nil
 	}

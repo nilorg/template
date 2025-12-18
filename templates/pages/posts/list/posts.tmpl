@@ -1,4 +1,13 @@
-{{ define "header"}}<title>Index Page</title>{{ end }}
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
 {{define "content"}}
-<h1>{{.title}}</h1>
+<h1>{{ .title }}</h1>
+<div class="posts-list">
+    {{ range .posts }}
+    <article style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+        <h2 style="margin-bottom: 0.5rem;"><a href="/posts/detail?id={{ .id }}" style="color: #2c3e50; text-decoration: none;">{{ .title }}</a></h2>
+        <p style="color: #666;">{{ .summary }}</p>
+        <small style="color: #999;">发布于: {{ formatDate .createdAt }}</small>
+    </article>
+    {{ end }}
+</div>
 {{end}}

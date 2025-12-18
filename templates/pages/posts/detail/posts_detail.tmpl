@@ -1,7 +1,16 @@
-{{ define "header"}}<title>Detail Page</title>{{ end }}
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
 {{define "content"}}
-<h1>{{.title}}</h1>
-<h1>{{.title}}</h1>
-<h1>{{.title}}</h1>
-<h1>{{.title}}</h1>
+<article>
+    <h1 style="margin-bottom: 1rem;">{{ .title }}</h1>
+    <div style="color: #666; margin-bottom: 2rem;">
+        <span>作者: {{ .author }}</span>
+        <span style="margin-left: 1rem;">发布于: {{ formatDate .createdAt }}</span>
+    </div>
+    <div style="line-height: 1.8;">
+        <p>{{ .content }}</p>
+    </div>
+    <div style="margin-top: 2rem;">
+        <a href="/posts" style="color: #3498db;">← 返回列表</a>
+    </div>
+</article>
 {{end}}

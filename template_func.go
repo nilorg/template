@@ -38,6 +38,9 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 	var pageDirs []string
 	basePagePath := filepath.Join(templatesDir, "pages")
 	err = filepath.WalkDir(basePagePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if d.IsDir() && path != basePagePath {
 			pageDirs = append(pageDirs, path)
 		}
@@ -94,7 +97,7 @@ func DefaultLoadTemplateWithEmbedFS(tmplFS *embed.FS, tmplFSSUbDir string, funcM
 }
 
 func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, funcMap FuncMap) {
-	// embed.FS 总是使用正斜杠路径，使用 path.Join 而不是 filepath.Join
+	// embed.FS 总是使用正斜杠路径，使用 path 包而不是 filepath 包
 	// 加载局部页面
 	partials, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "partials/*.tmpl"))
 	if err != nil {
@@ -111,7 +114,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 		panic(err)
 	}
 	for _, errPage := range errors {
-		tmplName := fmt.Sprintf("error/%s", filepath.Base(errPage))
+		tmplName := fmt.Sprintf("error/%s", path.Base(errPage))
 		files := []string{
 			errPage,
 		}
@@ -122,9 +125,12 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 	// 页面文件夹
 	var pageDirs []string
 	basePagePath := path.Join(tmplFSSUbDir, "pages")
-	err = fs.WalkDir(tmplFS, basePagePath, func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() && path != basePagePath {
-			pageDirs = append(pageDirs, path)
+	err = fs.WalkDir(tmplFS, basePagePath, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && p != basePagePath {
+			pageDirs = append(pageDirs, p)
 		}
 		return nil
 	})
@@ -146,7 +152,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 			files = append(files, partials...)
 			files = append(files, pageItems...)
 			pageName := strings.TrimPrefix(pageDir, basePagePath+"/")
-			tmplName := fmt.Sprintf("%s:pages/%s", filepath.Base(layout), pageName)
+			tmplName := fmt.Sprintf("%s:pages/%s", path.Base(layout), pageName)
 			r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
 		}
 	}
@@ -156,7 +162,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 		panic(err)
 	}
 	for _, singlePage := range singles {
-		tmplName := fmt.Sprintf("singles/%s", filepath.Base(singlePage))
+		tmplName := fmt.Sprintf("singles/%s", path.Base(singlePage))
 		files := []string{
 			singlePage,
 		}
