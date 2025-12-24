@@ -1,0 +1,8 @@
+{{ define "header" }}
+<title>{{ .title }} - {{ .constant.siteName }}</title>
+<style>
+    body { font-family: 'Comic Sans MS', cursive, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .container { max-width: 1200px; margin: 0 auto; background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
+    h1 { background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem; margin-bottom: 2rem; text-align: center; }
+</style>
+{{ end }}

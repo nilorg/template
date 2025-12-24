@@ -1,0 +1,74 @@
+{{ define "style" }}
+<style>
+    body { 
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        text-align: center; 
+        margin: 0;
+        padding: 0;
+    }
+    .error-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .error-box { 
+        padding: 3rem; 
+        background: white; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        max-width: 500px;
+        width: 90%;
+    }
+    .error-code { 
+        font-size: 6rem; 
+        font-weight: bold; 
+        color: #e74c3c; 
+        line-height: 1; 
+        margin-bottom: 1rem; 
+    }
+    .error-message { 
+        font-size: 1.5rem; 
+        color: #666; 
+        margin: 1rem 0; 
+    }
+    .error-path { 
+        color: #999; 
+        margin-bottom: 2rem; 
+        font-family: monospace; 
+        background: #f8f9fa; 
+        padding: 0.5rem; 
+        border-radius: 4px; 
+        word-break: break-all;
+    }
+    .theme-info { 
+        color: #666; 
+        margin-bottom: 2rem; 
+        font-size: 0.9rem; 
+    }
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn { 
+        display: inline-block; 
+        padding: 0.8rem 2rem; 
+        background: linear-gradient(135deg, #3498db, #2980b9); 
+        color: white; 
+        text-decoration: none; 
+        border-radius: 6px; 
+        transition: transform 0.2s; 
+        font-weight: 500;
+    }
+    .btn:hover { 
+        transform: translateY(-1px); 
+    }
+</style>
+{{ end }}

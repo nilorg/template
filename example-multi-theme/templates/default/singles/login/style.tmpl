@@ -1,0 +1,88 @@
+{{ define "style" }}
+<style>
+    body { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        margin: 0;
+        padding: 0;
+    }
+    .login-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .login-box { 
+        background: white; 
+        padding: 2.5rem; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+        width: 100%; 
+        max-width: 400px; 
+    }
+    .login-box h1 { 
+        text-align: center; 
+        margin-bottom: 1.5rem; 
+        color: #2c3e50; 
+        font-size: 1.8rem; 
+    }
+    .theme-info { 
+        text-align: center; 
+        margin-bottom: 1.5rem; 
+        color: #666; 
+        font-size: 0.9rem; 
+    }
+    .form-group { 
+        margin-bottom: 1.2rem; 
+    }
+    .form-group label { 
+        display: block; 
+        margin-bottom: 0.5rem; 
+        color: #333; 
+        font-weight: 500; 
+    }
+    .form-group input { 
+        width: 100%; 
+        padding: 0.8rem; 
+        border: 2px solid #ddd; 
+        border-radius: 6px; 
+        font-size: 1rem; 
+        transition: border-color 0.3s; 
+        box-sizing: border-box;
+    }
+    .form-group input:focus { 
+        outline: none; 
+        border-color: #3498db; 
+    }
+    .btn { 
+        width: 100%; 
+        padding: 0.8rem; 
+        background: linear-gradient(135deg, #3498db, #2980b9); 
+        color: white; 
+        border: none; 
+        border-radius: 6px; 
+        font-size: 1rem; 
+        cursor: pointer; 
+        transition: transform 0.2s; 
+    }
+    .btn:hover { 
+        transform: translateY(-1px); 
+    }
+    .links { 
+        text-align: center; 
+        margin-top: 1.5rem; 
+    }
+    .links a { 
+        color: #3498db; 
+        text-decoration: none; 
+        margin: 0 1rem; 
+    }
+    .links a:hover { 
+        text-decoration: underline; 
+    }
+</style>
+{{ end }}

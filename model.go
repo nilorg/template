@@ -67,3 +67,9 @@ func (r Render) Execute(name string, wr io.Writer, data interface{}) error {
 	}
 	return t.Execute(wr, data)
 }
+
+// HasTemplate 检查是否存在指定名称的模板
+func (r Render) HasTemplate(name string) bool {
+	_, ok := r[name]
+	return ok
+}

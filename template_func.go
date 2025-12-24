@@ -20,7 +20,7 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 	if err != nil {
 		panic(err)
 	}
-	// 加载错误页面
+	// 加载错误页面 - 支持分割模板和传统模板
 	errors, err := filepath.Glob(filepath.Join(templatesDir, "errors/*.tmpl"))
 	if err != nil {
 		panic(err)
@@ -32,6 +32,53 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 		}
 		files = append(files, partials...)
 		r.AddFromFilesFuncs(tmplName, funcMap, files...)
+	}
+
+	// 加载错误页面文件夹 - 新的分割模板架构
+	var errorDirs []string
+	baseErrorPath := filepath.Join(templatesDir, "errors")
+	err = filepath.WalkDir(baseErrorPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && path != baseErrorPath {
+			errorDirs = append(errorDirs, path)
+		}
+		return nil
+	})
+	if err == nil { // 如果errors目录存在
+		// 查找错误布局
+		errorLayouts, err := filepath.Glob(filepath.Join(templatesDir, "layouts/error.tmpl"))
+		if err != nil {
+			panic(err)
+		}
+		if len(errorLayouts) == 0 {
+			// 如果没有专用错误布局，使用单页布局
+			errorLayouts, err = filepath.Glob(filepath.Join(templatesDir, "layouts/single.tmpl"))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, errorDir := range errorDirs {
+			for _, layout := range errorLayouts {
+				errorItems, err := filepath.Glob(filepath.Join(errorDir, "*.tmpl"))
+				if err != nil {
+					panic(err)
+				}
+				if len(errorItems) == 0 {
+					continue
+				}
+				files := []string{
+					layout,
+				}
+				files = append(files, partials...)
+				files = append(files, errorItems...)
+				errorName := errorDir[len(baseErrorPath)+1:]
+				tmplName := fmt.Sprintf("%s:error/%s", filepath.Base(layout), errorName)
+				r.AddFromFilesFuncs(tmplName, funcMap, files...)
+			}
+		}
 	}
 
 	// 页面文件夹
@@ -68,7 +115,7 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 			r.AddFromFilesFuncs(tmplName, funcMap, files...)
 		}
 	}
-	// 加载单页面
+	// 加载单页面 - 支持分割模板和传统模板
 	singles, err := filepath.Glob(filepath.Join(templatesDir, "singles/*.tmpl"))
 	if err != nil {
 		panic(err)
@@ -80,6 +127,53 @@ func loadTemplate(r *Render, templatesDir string, funcMap FuncMap) {
 		}
 		files = append(files, partials...)
 		r.AddFromFilesFuncs(tmplName, funcMap, files...)
+	}
+
+	// 加载单页面文件夹 - 新的分割模板架构
+	var singleDirs []string
+	baseSinglePath := filepath.Join(templatesDir, "singles")
+	err = filepath.WalkDir(baseSinglePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && path != baseSinglePath {
+			singleDirs = append(singleDirs, path)
+		}
+		return nil
+	})
+	if err == nil { // 如果singles目录存在
+		// 查找单页布局
+		singleLayouts, err := filepath.Glob(filepath.Join(templatesDir, "layouts/single.tmpl"))
+		if err != nil {
+			panic(err)
+		}
+		if len(singleLayouts) == 0 {
+			// 如果没有专用单页布局，使用默认布局
+			singleLayouts, err = filepath.Glob(filepath.Join(templatesDir, "layouts/layout.tmpl"))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, singleDir := range singleDirs {
+			for _, layout := range singleLayouts {
+				singleItems, err := filepath.Glob(filepath.Join(singleDir, "*.tmpl"))
+				if err != nil {
+					panic(err)
+				}
+				if len(singleItems) == 0 {
+					continue
+				}
+				files := []string{
+					layout,
+				}
+				files = append(files, partials...)
+				files = append(files, singleItems...)
+				singleName := singleDir[len(baseSinglePath)+1:]
+				tmplName := fmt.Sprintf("%s:singles/%s", filepath.Base(layout), singleName)
+				r.AddFromFilesFuncs(tmplName, funcMap, files...)
+			}
+		}
 	}
 }
 
@@ -108,7 +202,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 	if err != nil {
 		panic(err)
 	}
-	// 加载错误页面
+	// 加载错误页面 - 支持分割模板和传统模板
 	errors, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "errors/*.tmpl"))
 	if err != nil {
 		panic(err)
@@ -120,6 +214,53 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 		}
 		files = append(files, partials...)
 		r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
+	}
+
+	// 加载错误页面文件夹 - 新的分割模板架构
+	var errorDirs []string
+	baseErrorPath := path.Join(tmplFSSUbDir, "errors")
+	err = fs.WalkDir(tmplFS, baseErrorPath, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && p != baseErrorPath {
+			errorDirs = append(errorDirs, p)
+		}
+		return nil
+	})
+	if err == nil { // 如果errors目录存在
+		// 查找错误布局
+		errorLayouts, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "layouts/error.tmpl"))
+		if err != nil {
+			panic(err)
+		}
+		if len(errorLayouts) == 0 {
+			// 如果没有专用错误布局，使用单页布局
+			errorLayouts, err = fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "layouts/single.tmpl"))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, errorDir := range errorDirs {
+			for _, layout := range errorLayouts {
+				errorItems, err := fs.Glob(tmplFS, path.Join(errorDir, "*.tmpl"))
+				if err != nil {
+					panic(err)
+				}
+				if len(errorItems) == 0 {
+					continue
+				}
+				files := []string{
+					layout,
+				}
+				files = append(files, partials...)
+				files = append(files, errorItems...)
+				errorName := strings.TrimPrefix(errorDir, baseErrorPath+"/")
+				tmplName := fmt.Sprintf("%s:error/%s", path.Base(layout), errorName)
+				r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
+			}
+		}
 	}
 
 	// 页面文件夹
@@ -156,7 +297,7 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 			r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
 		}
 	}
-	// 加载单页面
+	// 加载单页面 - 支持分割模板和传统模板
 	singles, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "singles/*.tmpl"))
 	if err != nil {
 		panic(err)
@@ -168,5 +309,52 @@ func loadTemplateWithEmbedFS(r *Render, tmplFS *embed.FS, tmplFSSUbDir string, f
 		}
 		files = append(files, partials...)
 		r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
+	}
+
+	// 加载单页面文件夹 - 新的分割模板架构
+	var singleDirs []string
+	baseSinglePath := path.Join(tmplFSSUbDir, "singles")
+	err = fs.WalkDir(tmplFS, baseSinglePath, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && p != baseSinglePath {
+			singleDirs = append(singleDirs, p)
+		}
+		return nil
+	})
+	if err == nil { // 如果singles目录存在
+		// 查找单页布局
+		singleLayouts, err := fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "layouts/single.tmpl"))
+		if err != nil {
+			panic(err)
+		}
+		if len(singleLayouts) == 0 {
+			// 如果没有专用单页布局，使用默认布局
+			singleLayouts, err = fs.Glob(tmplFS, path.Join(tmplFSSUbDir, "layouts/layout.tmpl"))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		for _, singleDir := range singleDirs {
+			for _, layout := range singleLayouts {
+				singleItems, err := fs.Glob(tmplFS, path.Join(singleDir, "*.tmpl"))
+				if err != nil {
+					panic(err)
+				}
+				if len(singleItems) == 0 {
+					continue
+				}
+				files := []string{
+					layout,
+				}
+				files = append(files, partials...)
+				files = append(files, singleItems...)
+				singleName := strings.TrimPrefix(singleDir, baseSinglePath+"/")
+				tmplName := fmt.Sprintf("%s:singles/%s", path.Base(layout), singleName)
+				r.AddFromFSFuncs(tmplName, funcMap, tmplFS, files...)
+			}
+		}
 	}
 }

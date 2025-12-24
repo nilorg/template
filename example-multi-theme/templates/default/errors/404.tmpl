@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
+        .error-box { padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .error-code { font-size: 6rem; font-weight: bold; color: #e74c3c; line-height: 1; margin-bottom: 1rem; }
+        .error-message { font-size: 1.5rem; color: #666; margin: 1rem 0; }
+        .error-path { color: #999; margin-bottom: 2rem; font-family: monospace; background: #f8f9fa; padding: 0.5rem; border-radius: 4px; }
+        .theme-info { color: #666; margin-bottom: 2rem; font-size: 0.9rem; }
+        .btn { display: inline-block; padding: 0.8rem 2rem; background: linear-gradient(135deg, #3498db, #2980b9); color: white; text-decoration: none; border-radius: 6px; margin: 0 0.5rem; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="error-box">
+        <div class="error-code">404</div>
+        <div class="error-message">{{ .message }}</div>
+        <div class="error-path">请求路径: {{ .path }}</div>
+        <div class="theme-info">当前主题: {{ .currentTheme }} (默认主题)</div>
+        <a href="/" class="btn">返回首页</a>
+        <a href="/themes" class="btn">主题管理</a>
+    </div>
+</body>
+</html>

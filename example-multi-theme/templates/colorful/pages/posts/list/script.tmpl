@@ -1,0 +1,65 @@
+{{ define "script" }}
+<script>
+// 彩色主题文章列表页面的JavaScript功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 为文章添加彩色主题特有的动画效果
+    const articles = document.querySelectorAll('article');
+    articles.forEach((article, index) => {
+        // 鼠标悬停时的动画效果
+        article.addEventListener('mouseenter', function() {
+            this.style.transform = 'rotate(0deg) scale(1.02)';
+            this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.25)';
+        });
+        article.addEventListener('mouseleave', function() {
+            const rotation = (index % 2 === 0) ? '-1deg' : '1deg';
+            this.style.transform = `rotate(${rotation}) scale(1)`;
+            this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+        });
+        
+        // 随机旋转角度
+        const randomRotation = (Math.random() - 0.5) * 4; // -2deg 到 2deg
+        article.style.transform = `rotate(${randomRotation}deg)`;
+    });
+    
+    // 为文章链接添加彩虹效果
+    const articleLinks = document.querySelectorAll('article h2 a');
+    articleLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
+            this.style.webkitBackgroundClip = 'text';
+            this.style.webkitTextFillColor = 'transparent';
+            this.style.backgroundClip = 'text';
+        });
+        link.addEventListener('mouseleave', function() {
+            this.style.background = 'none';
+            this.style.webkitTextFillColor = 'inherit';
+        });
+    });
+    
+    // 添加浮动动画
+    function addFloatingAnimation() {
+        articles.forEach((article, index) => {
+            const delay = index * 200;
+            setTimeout(() => {
+                article.style.animation = `float 3s ease-in-out infinite ${delay}ms`;
+            }, delay);
+        });
+    }
+    
+    // 添加CSS动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-5px) rotate(1deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 启动浮动动画
+    addFloatingAnimation();
+    
+    console.log('文章列表页面已加载完成 - 彩色主题 🎨');
+});
+</script>
+{{ end }}

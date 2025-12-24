@@ -1,0 +1,56 @@
+{{ define "script" }}
+<script>
+// 深色主题404错误页面交互脚本
+document.addEventListener('DOMContentLoaded', function() {
+    const errorCode = document.querySelector('.error-code');
+    const buttons = document.querySelectorAll('.btn');
+    
+    // 深色主题特有的错误代码发光效果
+    let clickCount = 0;
+    errorCode.addEventListener('click', function() {
+        clickCount++;
+        if (clickCount === 1) {
+            this.style.animation = 'glow 1s ease-in-out';
+            setTimeout(() => {
+                this.style.animation = 'none';
+            }, 1000);
+        } else if (clickCount === 3) {
+            this.textContent = '🌙';
+            this.style.color = '#64b5f6';
+            setTimeout(() => {
+                this.textContent = '404';
+                this.style.color = '#bb86fc';
+                clickCount = 0;
+            }, 2000);
+        }
+    });
+    
+    // 深色主题按钮效果
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 5px 15px rgba(187, 134, 252, 0.4)';
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.boxShadow = 'none';
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+
+// 添加深色主题CSS动画
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes glow {
+        0%, 100% { 
+            text-shadow: 0 0 20px rgba(187, 134, 252, 0.5); 
+        }
+        50% { 
+            text-shadow: 0 0 40px rgba(187, 134, 252, 0.8), 0 0 60px rgba(187, 134, 252, 0.6); 
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{{ end }}

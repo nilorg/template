@@ -1,0 +1,34 @@
+{{ define "script" }}
+<script>
+// 深色主题文章列表页面的JavaScript功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 为文章链接添加深色主题悬停效果
+    const articleLinks = document.querySelectorAll('article h2 a');
+    articleLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.color = '#03dac6';
+            this.style.textShadow = '0 0 8px rgba(3, 218, 198, 0.5)';
+        });
+        link.addEventListener('mouseleave', function() {
+            this.style.color = '#bb86fc';
+            this.style.textShadow = 'none';
+        });
+    });
+    
+    // 深色主题特有的功能
+    const articles = document.querySelectorAll('article');
+    articles.forEach(article => {
+        article.addEventListener('mouseenter', function() {
+            this.style.background = '#2a2a2a';
+            this.style.borderColor = '#bb86fc';
+        });
+        article.addEventListener('mouseleave', function() {
+            this.style.background = '#1e1e1e';
+            this.style.borderColor = '#333';
+        });
+    });
+    
+    console.log('文章列表页面已加载完成 - 深色主题');
+});
+</script>
+{{ end }}

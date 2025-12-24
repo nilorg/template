@@ -1,0 +1,48 @@
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
+{{define "content"}}
+<h1 style="color: #bb86fc;">{{ .title }}</h1>
+<div style="background: #1e1e1e; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #333;">
+    <h2 style="color: #bb86fc; margin-bottom: 1rem;">当前主题: {{ .currentTheme }}</h2>
+    <p style="color: #e0e0e0;">您可以在下方选择不同的主题来改变网站的外观和风格。</p>
+</div>
+
+<div class="themes-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    {{ range .availableThemes }}
+    <div class="theme-card" style="border: 2px solid {{ if eq . $.currentTheme }}#bb86fc{{ else }}#333{{ end }}; padding: 1.5rem; border-radius: 8px; background: #1e1e1e;">
+        <h3 style="color: #bb86fc; margin-bottom: 0.5rem;">{{ . }}</h3>
+        <p style="color: #b0b0b0; margin-bottom: 1rem;">
+            {{ if eq . "default" }}简洁的默认主题，适合日常使用{{ end }}
+            {{ if eq . "dark" }}深色主题，适合夜间浏览{{ end }}
+            {{ if eq . "colorful" }}彩色主题，活泼有趣的设计{{ end }}
+        </p>
+        {{ if eq . $.currentTheme }}
+        <span style="background: #27ae60; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;">当前使用</span>
+        {{ else }}
+        <form method="POST" action="/switch-theme" style="display: inline;">
+            <input type="hidden" name="theme" value="{{ . }}">
+            <button type="submit" style="background: #bb86fc; color: #121212; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;">切换到此主题</button>
+        </form>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+
+<div style="margin-top: 2rem; padding: 1rem; background: #1e1e1e; border-radius: 8px; border-left: 4px solid #bb86fc;">
+    <h3 style="color: #bb86fc; margin-bottom: 0.5rem;">使用说明</h3>
+    <ul style="color: #b0b0b0; padding-left: 1.5rem;">
+        <li>点击"切换到此主题"按钮即可立即切换主题</li>
+        <li>深色主题适合在光线较暗的环境中使用</li>
+        <li>每个主题都有独特的设计风格和配色方案</li>
+        <li>主题切换不会影响网站的功能和数据</li>
+    </ul>
+</div>
+{{end}}
+
+{{ define "script" }}
+<script>
+// 主题管理页面的JavaScript功能 - 深色主题
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('主题管理页面已加载完成 - 深色主题');
+});
+</script>
+{{ end }}

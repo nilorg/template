@@ -1,0 +1,16 @@
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+<div class="posts-list">
+    {{ range .posts }}
+    <article style="border: 1px solid #ddd; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 0.5rem;"><a href="/posts/detail?id={{ .id }}" style="color: #2c3e50; text-decoration: none;">{{ .title }}</a></h2>
+        <p style="color: #666; margin-bottom: 1rem;">{{ .summary }}</p>
+        <small style="color: #999;">发布于: {{ formatDate .createdAt }}</small>
+    </article>
+    {{ end }}
+</div>
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <p><strong>主题说明:</strong> 这是默认主题的文章列表页面，采用简洁的卡片式设计。</p>
+    <p><strong>模板结构:</strong> 此页面使用了分离的模板文件：header.tmpl（样式和标题）、content.tmpl（主要内容）、script.tmpl（JavaScript）。</p>
+</div>
+{{ end }}

@@ -1,0 +1,56 @@
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
+{{define "content"}}
+<h1 style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem; margin-bottom: 2rem;">🎨 {{ .title }}</h1>
+<div style="background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1)); padding: 2rem; border-radius: 15px; margin-bottom: 2rem; border: 2px solid #ff6b6b;">
+    <h2 style="color: #ff6b6b; margin-bottom: 1rem;">🌈 当前主题: {{ .currentTheme }}</h2>
+    <p style="color: #333; font-size: 1.1rem;">您可以在下方选择不同的主题来改变网站的外观和风格。每个主题都有独特的设计理念！</p>
+</div>
+
+<div class="themes-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+    {{ $colors := (list "#ff6b6b" "#4ecdc4" "#45b7d1") }}
+    {{ range $index, $theme := .availableThemes }}
+    {{ $color := index $colors (mod $index 3) }}
+    <div class="theme-card" style="border: 3px solid {{ if eq $theme $.currentTheme }}{{ $color }}{{ else }}#ddd{{ end }}; padding: 2rem; border-radius: 20px; background: {{ if eq $theme $.currentTheme }}linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8)){{ else }}rgba(255,255,255,0.9){{ end }}; box-shadow: 0 8px 25px rgba(0,0,0,0.1); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+        <h3 style="color: {{ $color }}; margin-bottom: 1rem; font-size: 1.5rem;">
+            {{ if eq $theme "default" }}🎯{{ end }}
+            {{ if eq $theme "dark" }}🌙{{ end }}
+            {{ if eq $theme "colorful" }}🌈{{ end }}
+            {{ $theme }}
+        </h3>
+        <p style="color: #555; margin-bottom: 1.5rem; font-size: 1.1rem;">
+            {{ if eq $theme "default" }}简洁的默认主题，适合日常使用{{ end }}
+            {{ if eq $theme "dark" }}深色主题，适合夜间浏览{{ end }}
+            {{ if eq $theme "colorful" }}彩色主题，活泼有趣的设计{{ end }}
+        </p>
+        {{ if eq $theme $.currentTheme }}
+        <span style="background: linear-gradient(45deg, #27ae60, #2ecc71); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 1rem; font-weight: bold;">✅ 当前使用</span>
+        {{ else }}
+        <form method="POST" action="/switch-theme" style="display: inline;">
+            <input type="hidden" name="theme" value="{{ $theme }}">
+            <button type="submit" style="background: linear-gradient(45deg, {{ $color }}, {{ $color }}dd); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🚀 切换到此主题</button>
+        </form>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+
+<div style="margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, rgba(150, 206, 180, 0.1), rgba(254, 202, 87, 0.1)); border-radius: 15px; border-left: 5px solid #96ceb4;">
+    <h3 style="color: #96ceb4; margin-bottom: 1rem; font-size: 1.5rem;">🎯 使用说明</h3>
+    <ul style="color: #555; padding-left: 2rem; font-size: 1.1rem; line-height: 1.8;">
+        <li>🚀 点击"切换到此主题"按钮即可立即切换主题</li>
+        <li>🌈 彩色主题使用动态渐变和丰富的色彩</li>
+        <li>🎨 每个主题都有独特的设计风格和配色方案</li>
+        <li>⚡ 主题切换不会影响网站的功能和数据</li>
+        <li>💫 享受不同主题带来的视觉体验吧！</li>
+    </ul>
+</div>
+{{end}}
+
+{{ define "script" }}
+<script>
+// 主题管理页面的JavaScript功能 - 彩色主题
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('主题管理页面已加载完成 - 彩色主题 🎨');
+});
+</script>
+{{ end }}

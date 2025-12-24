@@ -1,0 +1,1066 @@
+# 模板引擎 - AI 开发助手
+
+## 项目概述
+
+这是一个功能强大的 Go 模板引擎，支持全面的多主题功能、热重载、嵌入式文件系统和分离式模板架构。该引擎在提供完全向后兼容性的同时，为现代 Web 应用程序提供了高级功能。
+
+**最新版本特性：**
+- ✅ 多主题支持，支持运行时切换
+- ✅ 分离式模板架构，更好的代码组织
+- ✅ 完全向后兼容（零修改升级）
+- ✅ 性能优化，高效的资源管理
+- ✅ 全面的测试覆盖，包括基于属性的测试
+- ✅ 生产就绪，广泛的错误处理
+
+## 核心功能
+
+### 多主题支持
+- **运行时主题切换**，无需重启服务器
+- **自动主题发现**和验证
+- 通过 **theme.json 文件**进行主题配置
+- 与单主题项目的**完全向后兼容性**
+- **混合模式支持**（传统 + 主题目录共存）
+- **主题继承**和自定义功能
+
+### 分离式模板架构
+- **模块化模板**拆分为多个文件（header.tmpl、content.tmpl、script.tmpl）
+- 使用不同的 `define` 块实现**关注点分离**
+- 支持**主题特定的样式**、内容和 JavaScript 逻辑
+- **自动加载**和编译分离式模板
+- 与单体模板文件的**向后兼容性**
+- **减少文件臃肿**，提高可维护性
+
+### 模板加载系统
+- **双文件系统支持**（文件系统和嵌入式文件系统）
+- 开发时**热重载**和文件监听
+- **自动模板发现**和验证
+- 支持 **FuncMap 自定义模板函数**
+- **高效缓存**和资源管理
+- **错误恢复**和优雅降级
+
+## 架构设计
+
+### 核心组件
+
+1. **Engine** (`engine.go`)
+   - 支持多主题的主模板引擎
+   - 方法：Init()、SwitchTheme()、RenderPage()、RenderSingle()、RenderError()
+   - 主题管理和模板渲染
+
+2. **ThemeManager** (`theme.go`)
+   - 主题发现、加载和验证
+   - 主题元数据管理
+   - 每个主题的模板编译
+
+3. **Options** (`options.go`)
+   - 引擎设置的配置系统
+   - 选项：EnableMultiTheme()、DefaultTheme()、GlobalConstant() 等
+
+4. **Template Functions** (`template_func.go`)
+   - 文件系统和嵌入式文件系统的模板加载逻辑
+   - 支持页面目录中的分离式模板文件
+   - 自动发现布局、页面、单页、错误和部分模板
+
+### 模板结构
+
+```
+templates/
+├── [主题名称]/
+│   ├── theme.json              # 主题配置
+│   ├── layouts/
+│   │   └── layout.tmpl         # 主布局模板
+│   ├── pages/
+│   │   └── [页面名称]/
+│   │       ├── header.tmpl     # {{ define "header" }}
+│   │       ├── content.tmpl    # {{ define "content" }}
+│   │       └── script.tmpl     # {{ define "script" }}
+│   ├── singles/
+│   │   └── [页面].tmpl         # 独立页面
+│   ├── errors/
+│   │   └── [错误码].tmpl       # 错误页面
+│   └── partials/
+│       └── [部分].tmpl         # 可重用组件
+```
+
+## API 参考
+
+### 引擎创建
+
+```go
+// 基本单主题引擎
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap)
+
+// 多主题引擎
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap,
+    template.EnableMultiTheme(true),
+    template.DefaultTheme("default"),
+)
+
+// 嵌入式文件系统引擎
+engine, err := template.NewEngineWithEmbedFS(tmplFS, "templates", template.DefaultLoadTemplateWithEmbedFS, funcMap,
+    template.EnableMultiTheme(true),
+    template.DefaultTheme("default"),
+)
+```
+
+### 引擎方法
+
+```go
+// 初始化引擎
+engine.Init()
+
+// 主题管理
+themes := engine.GetAvailableThemes()
+current := engine.GetCurrentTheme()
+err := engine.SwitchTheme("主题名称")
+
+// 渲染
+err := engine.RenderPage(w, "页面名称", data)
+err := engine.RenderSingle(w, "单页名称", data)
+err := engine.RenderError(w, "错误码", data)
+
+// 开发
+err := engine.Watching()  // 启用热重载
+engine.Close()           // 清理资源
+```
+
+### 配置选项
+
+```go
+template.EnableMultiTheme(true)                    // 启用多主题模式
+template.DefaultTheme("主题名称")                   // 设置默认主题
+template.GlobalConstant(map[string]interface{}{})  // 设置全局常量
+template.GlobalVariable(map[string]interface{}{})  // 设置全局变量
+```
+
+## 分离式模板实现
+
+### 模板文件结构
+每个页面可以拆分为同一目录下的多个模板文件：
+
+```
+pages/posts/list/
+├── header.tmpl    # 页面头部、CSS、meta 标签
+├── content.tmpl   # 主要页面内容
+└── script.tmpl    # JavaScript 代码
+```
+
+### Define 块
+每个文件必须使用适当的 define 块：
+
+```html
+<!-- header.tmpl -->
+{{ define "header" }}
+<title>{{ .title }}</title>
+<style>/* CSS 样式 */</style>
+{{ end }}
+
+<!-- content.tmpl -->
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+<div>/* 页面内容 */</div>
+{{ end }}
+
+<!-- script.tmpl -->
+{{ define "script" }}
+<script>/* JavaScript 代码 */</script>
+{{ end }}
+```
+
+### 布局集成
+布局模板必须包含所有 define 块：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    {{ template "header" . }}
+</head>
+<body>
+    <main>
+        {{ template "content" . }}
+    </main>
+    {{ template "script" . }}
+</body>
+</html>
+```
+
+## 主题配置
+
+### theme.json 结构
+```json
+{
+    "name": "主题名称",
+    "displayName": "主题显示名称",
+    "description": "主题描述",
+    "version": "1.0.0",
+    "author": "作者姓名",
+    "tags": ["标签1", "标签2"],
+    "custom": {
+        "primaryColor": "#颜色",
+        "accentColor": "#颜色"
+    }
+}
+```
+
+## 开发指南
+
+### 创建新主题
+1. 在 templates/ 下创建主题目录
+2. 复制基础主题结构
+3. 自定义模板和样式
+4. 创建 theme.json 配置
+5. 测试主题切换功能
+
+### 分离式模板最佳实践
+1. **关注点分离**：将 CSS 放在 header.tmpl，内容放在 content.tmpl，JS 放在 script.tmpl
+2. **一致性**：在所有主题中使用相同的文件名
+3. **独立性**：避免模板文件之间的依赖
+4. **主题差异化**：每个主题可以有独特的样式和行为
+
+### 测试
+- 为主题切换功能编写测试
+- 测试分离式模板渲染
+- 验证向后兼容性
+- 主题操作的性能测试
+
+## 常用模式
+
+### 自定义模板函数
+```go
+funcMap := template.FuncMap{
+    // 日期格式化
+    "formatDate": func(t time.Time) string {
+        return t.Format("2006-01-02 15:04:05")
+    },
+    
+    // 列表创建
+    "list": func(items ...interface{}) []interface{} {
+        return items
+    },
+    
+    // 数学运算
+    "mod": func(a, b int) int {
+        return a % b
+    },
+    
+    // 主题感知函数
+    "themeAsset": func(path string) string {
+        currentTheme := engine.GetCurrentTheme()
+        return fmt.Sprintf("/assets/%s/%s", currentTheme, path)
+    },
+    
+    // 基于主题的条件渲染
+    "ifTheme": func(themeName string, content interface{}) interface{} {
+        if engine.GetCurrentTheme() == themeName {
+            return content
+        }
+        return ""
+    },
+}
+```
+
+### 主题切换处理器
+```go
+func switchThemeHandler(w http.ResponseWriter, r *http.Request) {
+    themeName := r.FormValue("theme")
+    
+    // 验证主题是否存在
+    if !engine.ThemeExists(themeName) {
+        http.Error(w, "主题不存在", http.StatusBadRequest)
+        return
+    }
+    
+    // 切换主题
+    if err := engine.SwitchTheme(themeName); err != nil {
+        log.Printf("主题切换失败: %v", err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    
+    // 存储主题偏好（可选）
+    http.SetCookie(w, &http.Cookie{
+        Name:  "theme",
+        Value: themeName,
+        Path:  "/",
+    })
+    
+    // 重定向回原页面
+    http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
+}
+```
+
+### 主题管理 API
+```go
+func themesAPIHandler(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case "GET":
+        // 获取可用主题
+        themes := engine.GetAvailableThemes()
+        current := engine.GetCurrentTheme()
+        
+        response := map[string]interface{}{
+            "themes":  themes,
+            "current": current,
+        }
+        
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(response)
+        
+    case "POST":
+        // 切换主题
+        var req struct {
+            Theme string `json:"theme"`
+        }
+        
+        if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+            http.Error(w, "无效的 JSON", http.StatusBadRequest)
+            return
+        }
+        
+        if err := engine.SwitchTheme(req.Theme); err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+        
+        w.WriteHeader(http.StatusOK)
+    }
+}
+```
+
+### 模板数据结构
+```go
+// 标准模板数据结构
+data := template.H{
+    "title":        "页面标题",
+    "currentTheme": engine.GetCurrentTheme(),
+    "content":      "页面内容",
+    "posts":        []Post{...},
+    
+    // 主题特定数据
+    "themeConfig": engine.GetThemeMetadata(engine.GetCurrentTheme()),
+    
+    // 全局常量（在所有模板中可用）
+    "constant": map[string]interface{}{
+        "siteName": "我的网站",
+        "version":  "2.0.0",
+    },
+    
+    // 全局变量（可以改变）
+    "variable": map[string]interface{}{
+        "year": time.Now().Year(),
+        "user": getCurrentUser(r),
+    },
+}
+```
+
+### 主题管理中间件
+```go
+func themeMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // 检查 cookie 中的主题偏好
+        if cookie, err := r.Cookie("theme"); err == nil {
+            if engine.ThemeExists(cookie.Value) {
+                engine.SwitchTheme(cookie.Value)
+            }
+        }
+        
+        // 检查 URL 参数中的主题
+        if theme := r.URL.Query().Get("theme"); theme != "" {
+            if engine.ThemeExists(theme) {
+                engine.SwitchTheme(theme)
+                // 为后续请求设置 cookie
+                http.SetCookie(w, &http.Cookie{
+                    Name:  "theme",
+                    Value: theme,
+                    Path:  "/",
+                })
+            }
+        }
+        
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+### 错误处理模式
+```go
+func renderWithFallback(w http.ResponseWriter, templateName string, data interface{}) {
+    err := engine.RenderPage(w, templateName, data)
+    if err != nil {
+        log.Printf("模板渲染失败: %v", err)
+        
+        // 尝试回退主题
+        currentTheme := engine.GetCurrentTheme()
+        if currentTheme != "default" {
+            log.Printf("尝试回退主题: default")
+            if switchErr := engine.SwitchTheme("default"); switchErr == nil {
+                if fallbackErr := engine.RenderPage(w, templateName, data); fallbackErr == nil {
+                    return
+                }
+                // 切换回原主题
+                engine.SwitchTheme(currentTheme)
+            }
+        }
+        
+        // 最终回退 - 渲染错误页面
+        engine.RenderError(w, "500", template.H{
+            "error": "模板渲染失败",
+        })
+    }
+}
+```
+
+## 错误处理
+
+### 常见错误
+- 主题未找到：验证主题目录存在且具有所需结构
+- 模板解析错误：检查模板语法和 define 块
+- 缺少模板文件：确保主题中存在所有必需的模板
+
+### 调试
+- 启用详细日志记录
+- 检查主题发现结果
+- 验证模板编译
+- 监控主题切换操作
+
+## 性能考虑
+
+- 模板每个主题编译一次
+- 只有活动主题模板加载到内存中
+- 热重载仅用于开发
+- 生产部署使用嵌入式文件系统
+
+## 向后兼容性保证
+
+### 完全兼容性承诺
+
+多主题功能采用**渐进式增强**设计原则，确保现有项目无需任何修改即可继续使用：
+
+#### API 兼容性
+- 所有现有方法签名保持不变
+- `NewEngine()`、`RenderPage()`、`RenderSingle()`、`RenderError()` 行为完全相同
+- 配置选项完全向后兼容
+- 错误处理行为保持一致
+
+#### 目录结构兼容性
+- 传统单主题结构继续工作
+- 自动模式检测（传统 vs 多主题）
+- 混合模式支持（传统 + 主题目录）
+
+#### 性能兼容性
+- 传统模式性能与原版本完全相同
+- 多主题功能仅在需要时加载
+- 内存使用模式保持不变
+
+#### 迁移路径
+```go
+// 零修改升级
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap)
+// 行为完全相同，无需任何修改
+
+// 渐进式启用多主题
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap,
+    template.EnableMultiTheme(true), // 可选的新功能
+)
+```
+
+### 从单主题到多主题
+1. 将现有模板移动到 `templates/default/` 目录
+2. 添加 `template.EnableMultiTheme(true)` 选项
+3. 更新初始化代码使用 `SwitchTheme()` 而不是 `Theme()` 选项
+4. 测试向后兼容性
+
+### 迁移到分离式模板
+1. 识别可分离的组件（CSS、内容、JS）
+2. 创建带有适当 define 块的单独 .tmpl 文件
+3. 更新布局模板以包含所有块
+4. 测试渲染功能
+
+## 示例项目
+
+### 多主题示例应用
+`example-multi-theme/` 目录包含完整的示例应用，展示：
+- 三个不同风格的主题（默认、深色、彩色）
+- 分离式模板结构
+- 主题管理界面
+- 运行时主题切换
+- 完整的测试套件
+
+### 运行示例
+```bash
+cd example-multi-theme
+go run main.go
+```
+
+访问 http://localhost:8080/themes 体验主题切换功能。
+
+## 高级功能
+
+### 主题继承
+- 主题可以继承其他主题的模板
+- 支持部分覆盖和扩展
+- 减少重复代码
+
+### 自定义模板函数
+- 支持注册自定义模板函数
+- 函数可以访问主题上下文
+- 支持主题特定的函数
+
+### 嵌入式文件系统
+- 支持将模板打包到二进制文件
+- 生产环境部署友好
+- 支持多主题的嵌入式部署
+
+## 故障排除
+
+### 常见问题及解决方案
+
+1. **主题切换失败**
+   ```bash
+   # 检查主题目录结构
+   ls -la templates/[主题名称]/
+   
+   # 确认必需文件存在
+   ls templates/[主题名称]/{layouts,pages,singles,errors}/
+   ```
+
+2. **模板渲染错误**
+   ```bash
+   # 检查模板语法
+   go run main.go 2>&1 | grep "template"
+   
+   # 验证 define 块名称
+   grep -r "define" templates/
+   ```
+
+3. **分离式模板问题**
+   - 确保所有 define 块都有对应的模板文件
+   - 检查布局模板是否包含所有必需的 template 调用
+   - 验证模板函数是否正确定义
+
+### 调试技巧
+
+```go
+// 启用详细日志
+log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+// 检查当前主题
+log.Printf("当前主题: %s", engine.GetCurrentTheme())
+
+// 列出可用主题
+log.Printf("可用主题: %v", engine.GetAvailableThemes())
+
+// 检查模板加载状态
+log.Printf("模板已加载: %v", engine.IsTemplateLoaded("posts/list"))
+```
+
+## 扩展开发
+
+### 添加新功能
+- 主题插件系统
+- 用户自定义主题
+- 主题商店和在线下载
+- 主题预览功能
+
+### 贡献指南
+- 遵循 Go 编码规范
+- 编写完整的测试用例
+- 更新相关文档
+- 保持向后兼容性
+
+## 实用开发技巧
+
+### 主题开发工作流
+
+#### 1. 快速主题原型
+```bash
+# 创建新主题的快速脚本
+#!/bin/bash
+THEME_NAME=$1
+BASE_THEME=${2:-default}
+
+# 创建主题目录
+mkdir -p templates/$THEME_NAME/{layouts,pages,singles,errors,partials}
+
+# 复制基础主题
+cp -r templates/$BASE_THEME/* templates/$THEME_NAME/
+
+# 创建主题配置
+cat > templates/$THEME_NAME/theme.json << EOF
+{
+    "name": "$THEME_NAME",
+    "displayName": "$(echo $THEME_NAME | sed 's/.*/\u&/')",
+    "description": "基于 $BASE_THEME 的自定义主题",
+    "version": "1.0.0",
+    "author": "$(git config user.name)",
+    "tags": ["custom", "derived"],
+    "custom": {}
+}
+EOF
+
+echo "主题 $THEME_NAME 创建完成！"
+```
+
+#### 2. 主题预览工具
+```go
+// 主题预览处理器
+func themePreviewHandler(w http.ResponseWriter, r *http.Request) {
+    themeName := r.URL.Query().Get("theme")
+    if themeName == "" {
+        http.Error(w, "需要指定主题名称", http.StatusBadRequest)
+        return
+    }
+    
+    // 临时切换主题（不影响全局状态）
+    originalTheme := engine.GetCurrentTheme()
+    defer engine.SwitchTheme(originalTheme)
+    
+    if err := engine.SwitchTheme(themeName); err != nil {
+        http.Error(w, fmt.Sprintf("主题切换失败: %v", err), http.StatusBadRequest)
+        return
+    }
+    
+    // 渲染预览页面
+    data := template.H{
+        "title":       "主题预览 - " + themeName,
+        "previewMode": true,
+        "themeName":   themeName,
+    }
+    
+    engine.RenderPage(w, "theme-preview", data)
+}
+```
+
+#### 3. 主题验证工具
+```go
+func validateTheme(themeName string) error {
+    requiredDirs := []string{"layouts", "pages", "singles", "errors"}
+    requiredFiles := []string{
+        "layouts/layout.tmpl",
+        "pages/home/home.tmpl", // 或分离式结构
+        "singles/login.tmpl",
+        "errors/404.tmpl",
+    }
+    
+    themeDir := filepath.Join("templates", themeName)
+    
+    // 检查目录结构
+    for _, dir := range requiredDirs {
+        dirPath := filepath.Join(themeDir, dir)
+        if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+            return fmt.Errorf("缺少必需目录: %s", dir)
+        }
+    }
+    
+    // 检查关键文件
+    for _, file := range requiredFiles {
+        filePath := filepath.Join(themeDir, file)
+        if _, err := os.Stat(filePath); os.IsNotExist(err) {
+            // 检查是否为分离式模板
+            if strings.Contains(file, "/") {
+                dir := filepath.Dir(filePath)
+                if hasValidSplitTemplates(dir) {
+                    continue
+                }
+            }
+            return fmt.Errorf("缺少必需文件: %s", file)
+        }
+    }
+    
+    return nil
+}
+```
+
+### 性能优化技巧
+
+#### 1. 主题缓存策略
+```go
+type ThemeCache struct {
+    themes map[string]*Theme
+    mutex  sync.RWMutex
+}
+
+func (tc *ThemeCache) GetTheme(name string) (*Theme, bool) {
+    tc.mutex.RLock()
+    defer tc.mutex.RUnlock()
+    theme, exists := tc.themes[name]
+    return theme, exists
+}
+
+func (tc *ThemeCache) SetTheme(name string, theme *Theme) {
+    tc.mutex.Lock()
+    defer tc.mutex.Unlock()
+    tc.themes[name] = theme
+}
+```
+
+#### 2. 模板预编译
+```go
+func precompileThemes() error {
+    themes := engine.GetAvailableThemes()
+    
+    for _, themeName := range themes {
+        log.Printf("预编译主题: %s", themeName)
+        
+        // 切换到主题并触发模板加载
+        if err := engine.SwitchTheme(themeName); err != nil {
+            return fmt.Errorf("主题 %s 预编译失败: %v", themeName, err)
+        }
+        
+        // 预渲染常用模板以触发编译
+        testData := template.H{"title": "预编译测试"}
+        var buf bytes.Buffer
+        
+        // 测试关键模板
+        templates := []string{"home", "login", "404"}
+        for _, tmpl := range templates {
+            buf.Reset()
+            if err := engine.RenderPage(&buf, tmpl, testData); err != nil {
+                log.Printf("警告: 主题 %s 的模板 %s 预编译失败: %v", themeName, tmpl, err)
+            }
+        }
+    }
+    
+    return nil
+}
+```
+
+### 调试和故障排除
+
+#### 1. 主题调试模式
+```go
+func enableThemeDebug() {
+    // 设置详细日志
+    log.SetFlags(log.LstdFlags | log.Lshortfile)
+    
+    // 添加主题切换日志
+    originalSwitchTheme := engine.SwitchTheme
+    engine.SwitchTheme = func(themeName string) error {
+        log.Printf("尝试切换到主题: %s", themeName)
+        start := time.Now()
+        
+        err := originalSwitchTheme(themeName)
+        
+        if err != nil {
+            log.Printf("主题切换失败: %v", err)
+        } else {
+            log.Printf("主题切换成功，耗时: %v", time.Since(start))
+        }
+        
+        return err
+    }
+}
+```
+
+#### 2. 模板渲染调试
+```go
+func debugRender(templateName string, data interface{}) {
+    log.Printf("渲染模板: %s", templateName)
+    log.Printf("当前主题: %s", engine.GetCurrentTheme())
+    log.Printf("数据: %+v", data)
+    
+    // 检查模板是否存在
+    if !engine.TemplateExists(templateName) {
+        log.Printf("警告: 模板 %s 不存在", templateName)
+    }
+    
+    // 检查主题是否有该模板
+    currentTheme := engine.GetCurrentTheme()
+    templatePath := fmt.Sprintf("templates/%s/pages/%s", currentTheme, templateName)
+    if _, err := os.Stat(templatePath); os.IsNotExist(err) {
+        log.Printf("警告: 主题 %s 中不存在模板 %s", currentTheme, templateName)
+    }
+}
+```
+
+#### 3. 常见问题诊断
+```go
+func diagnoseThemeIssues() {
+    log.Println("=== 主题诊断开始 ===")
+    
+    // 检查可用主题
+    themes := engine.GetAvailableThemes()
+    log.Printf("发现主题: %v", themes)
+    
+    if len(themes) == 0 {
+        log.Println("错误: 未发现任何主题")
+        return
+    }
+    
+    // 检查当前主题
+    current := engine.GetCurrentTheme()
+    log.Printf("当前主题: %s", current)
+    
+    // 验证每个主题
+    for _, theme := range themes {
+        log.Printf("验证主题: %s", theme)
+        if err := validateTheme(theme); err != nil {
+            log.Printf("主题 %s 验证失败: %v", theme, err)
+        } else {
+            log.Printf("主题 %s 验证通过", theme)
+        }
+    }
+    
+    log.Println("=== 主题诊断完成 ===")
+}
+```
+
+### 生产环境最佳实践
+
+#### 1. 主题热更新
+```go
+func watchThemeChanges() {
+    watcher, err := fsnotify.NewWatcher()
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer watcher.Close()
+    
+    // 监听主题目录
+    themes := engine.GetAvailableThemes()
+    for _, theme := range themes {
+        themeDir := filepath.Join("templates", theme)
+        watcher.Add(themeDir)
+    }
+    
+    go func() {
+        for {
+            select {
+            case event, ok := <-watcher.Events:
+                if !ok {
+                    return
+                }
+                
+                if event.Op&fsnotify.Write == fsnotify.Write {
+                    log.Printf("主题文件变更: %s", event.Name)
+                    // 重新加载受影响的主题
+                    reloadThemeFromFile(event.Name)
+                }
+                
+            case err, ok := <-watcher.Errors:
+                if !ok {
+                    return
+                }
+                log.Printf("主题监听错误: %v", err)
+            }
+        }
+    }()
+}
+```
+
+#### 2. 主题回退机制
+```go
+func renderWithFallbackChain(w http.ResponseWriter, templateName string, data interface{}) {
+    fallbackChain := []string{
+        engine.GetCurrentTheme(),
+        "default",
+        "fallback",
+    }
+    
+    for _, theme := range fallbackChain {
+        if !engine.ThemeExists(theme) {
+            continue
+        }
+        
+        originalTheme := engine.GetCurrentTheme()
+        if err := engine.SwitchTheme(theme); err != nil {
+            continue
+        }
+        
+        var buf bytes.Buffer
+        if err := engine.RenderPage(&buf, templateName, data); err == nil {
+            // 渲染成功
+            w.Write(buf.Bytes())
+            if theme != originalTheme {
+                log.Printf("使用回退主题 %s 渲染 %s", theme, templateName)
+            }
+            return
+        }
+        
+        // 恢复原主题
+        engine.SwitchTheme(originalTheme)
+    }
+    
+    // 所有主题都失败，返回基本错误页面
+    http.Error(w, "模板渲染失败", http.StatusInternalServerError)
+}
+```
+
+### 生产环境监控
+
+#### 健康检查实现
+```go
+func setupHealthChecks() {
+    http.HandleFunc("/health/themes", func(w http.ResponseWriter, r *http.Request) {
+        health := map[string]interface{}{
+            "status":        "ok",
+            "themes":        engine.GetAvailableThemes(),
+            "current_theme": engine.GetCurrentTheme(),
+            "timestamp":     time.Now().Unix(),
+        }
+        
+        // 测试关键模板渲染
+        var buf bytes.Buffer
+        testData := template.H{"title": "健康检查"}
+        if err := engine.RenderPage(&buf, "health", testData); err != nil {
+            health["status"] = "degraded"
+            health["template_error"] = err.Error()
+            w.WriteHeader(http.StatusServiceUnavailable)
+        }
+        
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(health)
+    })
+}
+```
+
+#### 指标收集
+```go
+type ThemeMetrics struct {
+    SwitchCount    int64
+    RenderCount    int64
+    ErrorCount     int64
+    LastSwitchTime time.Time
+    mutex          sync.RWMutex
+}
+
+func (tm *ThemeMetrics) RecordSwitch() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.SwitchCount++
+    tm.LastSwitchTime = time.Now()
+}
+
+func (tm *ThemeMetrics) RecordRender() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.RenderCount++
+}
+
+func (tm *ThemeMetrics) RecordError() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.ErrorCount++
+}
+```
+
+### 高级集成模式
+
+#### 微服务主题协调
+```go
+// 跨服务的主题状态同步
+type ThemeCoordinator struct {
+    redis  *redis.Client
+    engine *template.Engine
+}
+
+func (tc *ThemeCoordinator) SyncTheme(themeName string) error {
+    // 更新本地引擎
+    if err := tc.engine.SwitchTheme(themeName); err != nil {
+        return err
+    }
+    
+    // 广播到其他服务
+    return tc.redis.Publish("theme:switch", themeName).Err()
+}
+
+func (tc *ThemeCoordinator) ListenForThemeChanges() {
+    pubsub := tc.redis.Subscribe("theme:switch")
+    defer pubsub.Close()
+    
+    for msg := range pubsub.Channel() {
+        themeName := msg.Payload
+        if tc.engine.ThemeExists(themeName) {
+            tc.engine.SwitchTheme(themeName)
+            log.Printf("同步到主题: %s", themeName)
+        }
+    }
+}
+```
+
+#### CDN 集成主题资源
+```go
+func setupThemeAssetCDN() {
+    http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+        currentTheme := engine.GetCurrentTheme()
+        assetPath := strings.TrimPrefix(r.URL.Path, "/assets/")
+        
+        // 构建主题特定的资源 URL
+        cdnURL := fmt.Sprintf("https://cdn.example.com/themes/%s/%s", 
+            currentTheme, assetPath)
+        
+        // 设置缓存头
+        w.Header().Set("Cache-Control", "public, max-age=3600")
+        w.Header().Set("X-Theme", currentTheme)
+        
+        // 重定向到 CDN
+        http.Redirect(w, r, cdnURL, http.StatusMovedPermanently)
+    })
+}
+```
+
+### 安全考虑
+
+#### 主题验证和清理
+```go
+func validateThemeInput(themeName string) error {
+    // 防止路径遍历
+    if strings.Contains(themeName, "..") || strings.Contains(themeName, "/") {
+        return fmt.Errorf("无效的主题名称: 包含非法字符")
+    }
+    
+    // 白名单允许的字符
+    matched, _ := regexp.MatchString("^[a-zA-Z0-9_-]+$", themeName)
+    if !matched {
+        return fmt.Errorf("无效的主题名称: 只允许字母数字、下划线和短横线")
+    }
+    
+    // 检查长度限制
+    if len(themeName) > 50 {
+        return fmt.Errorf("主题名称过长: 最多50个字符")
+    }
+    
+    return nil
+}
+```
+
+#### 主题切换频率限制
+```go
+type ThemeRateLimiter struct {
+    requests map[string][]time.Time
+    mutex    sync.RWMutex
+    limit    int
+    window   time.Duration
+}
+
+func (trl *ThemeRateLimiter) Allow(clientID string) bool {
+    trl.mutex.Lock()
+    defer trl.mutex.Unlock()
+    
+    now := time.Now()
+    cutoff := now.Add(-trl.window)
+    
+    // 清理旧请求
+    requests := trl.requests[clientID]
+    validRequests := []time.Time{}
+    for _, req := range requests {
+        if req.After(cutoff) {
+            validRequests = append(validRequests, req)
+        }
+    }
+    
+    // 检查限制
+    if len(validRequests) >= trl.limit {
+        return false
+    }
+    
+    // 添加当前请求
+    validRequests = append(validRequests, now)
+    trl.requests[clientID] = validRequests
+    
+    return true
+}
+```
+
+这些更新为AI开发指南添加了更多实用的信息，包括详细的开发工作流、性能优化技巧、调试方法、生产环境最佳实践、监控、安全考虑和微服务集成模式。

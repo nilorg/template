@@ -1,0 +1,1298 @@
+# Template Engine - AI Development Assistant
+
+## Project Overview
+
+This is a powerful Go template engine with comprehensive multi-theme support, hot reloading, embedded filesystem support, and split template architecture. The engine provides complete backward compatibility while offering advanced features for modern web applications.
+
+**Latest Version Features:**
+- ✅ Multi-theme support with runtime switching
+- ✅ Split template architecture for better code organization
+- ✅ Complete backward compatibility (zero-modification upgrades)
+- ✅ Performance optimized with efficient resource management
+- ✅ Comprehensive test coverage including property-based testing
+- ✅ Production-ready with extensive error handling
+
+## Core Features
+
+### Multi-Theme Support
+- **Runtime theme switching** without server restart
+- **Automatic theme discovery** and validation
+- **Theme configuration** via theme.json files
+- **Complete backward compatibility** with single-theme projects
+- **Mixed mode support** (traditional + theme directories coexist)
+- **Theme inheritance** and customization capabilities
+
+### Split Template Architecture
+- **Modular templates** split into multiple files (header.tmpl, content.tmpl, script.tmpl)
+- **Separation of concerns** with different `define` blocks
+- **Theme-specific styling**, content, and JavaScript logic
+- **Automatic loading** and compilation of split templates
+- **Backward compatibility** with monolithic template files
+- **Reduced file bloat** and improved maintainability
+
+### Template Loading System
+- **Dual filesystem support** (file system and embedded filesystem)
+- **Hot reloading** during development with file watching
+- **Automatic template discovery** and validation
+- **Custom template function** support with FuncMap
+- **Efficient caching** and resource management
+- **Error recovery** and graceful degradation
+
+## Architecture
+
+### System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        User Layer                           │
+├─────────────────────────┬───────────────────────────────────┤
+│    Existing Code        │         New Multi-Theme Code      │
+│    (Zero Changes)       │         (Optional Features)       │
+└─────────────────────────┼───────────────────────────────────┘
+                          │
+┌─────────────────────────┼───────────────────────────────────┐
+│                    Engine Layer                             │
+│  ┌─────────────────────┐│┌─────────────────────────────────┐ │
+│  │   Legacy Mode       │││      Multi-Theme Mode           │ │
+│  │   (Traditional)     │││      (Enhanced)                 │ │
+│  └─────────────────────┘│└─────────────────────────────────┘ │
+└─────────────────────────┼───────────────────────────────────┘
+                          │
+┌─────────────────────────┼───────────────────────────────────┐
+│                  Theme Management Layer                     │
+│  ┌─────────────────────┐│┌─────────────────────────────────┐ │
+│  │  Auto Detection     │││    Theme Manager                │ │
+│  │  (Mode Selection)   │││    (Discovery & Switching)      │ │
+│  └─────────────────────┘│└─────────────────────────────────┘ │
+└─────────────────────────┼───────────────────────────────────┘
+                          │
+┌─────────────────────────┼───────────────────────────────────┐
+│                   Storage Layer                             │
+│  ┌─────────────────────┐│┌─────────────────────────────────┐ │
+│  │   File System       │││      Embedded FS                │ │
+│  │   (Development)     │││      (Production)               │ │
+│  └─────────────────────┘│└─────────────────────────────────┘ │
+└─────────────────────────┴───────────────────────────────────┘
+```
+
+### Key Components
+
+1. **Engine** (`engine.go`)
+   - **Main template engine** with multi-theme support
+   - **Backward compatible API** preserving all existing methods
+   - **Automatic mode detection** (legacy vs multi-theme)
+   - **Methods**: Init(), SwitchTheme(), RenderPage(), RenderSingle(), RenderError()
+   - **Theme management** and template rendering coordination
+
+2. **ThemeManager** (`theme.go`)
+   - **Theme discovery** and loading with validation
+   - **Theme metadata management** via theme.json files
+   - **Template compilation** per theme with caching
+   - **Runtime theme switching** with state management
+   - **Error handling** and recovery mechanisms
+
+3. **Options** (`options.go`)
+   - **Configuration system** for engine setup with backward compatibility
+   - **New options**: EnableMultiTheme(), DefaultTheme(), Theme()
+   - **Existing options**: GlobalConstant(), GlobalVariable() (unchanged)
+   - **Progressive enhancement** approach for new features
+
+4. **Template Functions** (`template_func.go`)
+   - **Template loading logic** for both file system and embedded FS
+   - **Split template support** in page directories
+   - **Automatic discovery** of layouts, pages, singles, errors, and partials
+   - **Backward compatibility** with traditional template structures
+
+### Template Structure
+
+#### Traditional Structure (Backward Compatible)
+```
+templates/
+├── layouts/
+│   └── layout.tmpl         # Main layout template
+├── pages/
+│   └── [page-name]/
+│       └── page.tmpl       # Page template with define blocks
+├── singles/
+│   └── [page].tmpl         # Standalone pages
+├── errors/
+│   └── [code].tmpl         # Error pages
+└── partials/
+    └── [partial].tmpl      # Reusable components
+```
+
+#### Multi-Theme Structure (Enhanced)
+```
+templates/
+├── [theme-name]/
+│   ├── theme.json              # Theme configuration
+│   ├── layouts/
+│   │   ├── layout.tmpl         # Main layout template
+│   │   ├── single.tmpl         # Layout for singles
+│   │   └── error.tmpl          # Layout for errors
+│   ├── pages/
+│   │   └── [page-name]/
+│   │       ├── header.tmpl     # {{ define "header" }}
+│   │       ├── content.tmpl    # {{ define "content" }}
+│   │       └── script.tmpl     # {{ define "script" }}
+│   ├── singles/
+│   │   └── [page]/
+│   │       ├── header.tmpl     # Split single templates
+│   │       ├── content.tmpl
+│   │       ├── style.tmpl
+│   │       └── script.tmpl
+│   ├── errors/
+│   │   └── [code]/
+│   │       ├── header.tmpl     # Split error templates
+│   │       ├── content.tmpl
+│   │       ├── style.tmpl
+│   │       └── script.tmpl
+│   └── partials/
+│       └── [partial].tmpl      # Reusable components
+└── [another-theme]/            # Additional themes
+    └── ...                     # Same structure
+```
+
+#### Mixed Mode Support
+```
+templates/
+├── layouts/          # Traditional structure (default theme)
+├── pages/
+├── singles/
+├── errors/
+├── partials/
+├── dark/             # Additional theme
+│   ├── layouts/
+│   ├── pages/
+│   └── ...
+└── colorful/         # Another theme
+    ├── layouts/
+    ├── pages/
+    └── ...
+```
+
+## API Reference
+
+### Engine Creation
+
+#### Basic Single-Theme Engine (Backward Compatible)
+```go
+// Traditional approach - no changes required
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap)
+if err != nil {
+    log.Fatal(err)
+}
+engine.Init()
+```
+
+#### Multi-Theme Engine (Enhanced)
+```go
+// Multi-theme with automatic detection
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap,
+    template.EnableMultiTheme(true),        // Enable multi-theme mode
+    template.DefaultTheme("default"),       // Set default theme
+)
+if err != nil {
+    log.Fatal(err)
+}
+engine.Init()
+
+// Switch to specific theme
+err = engine.SwitchTheme("dark")
+if err != nil {
+    log.Printf("Theme switch failed: %v", err)
+}
+```
+
+#### Embedded Filesystem Engine
+```go
+//go:embed templates/*
+var tmplFS embed.FS
+
+// Embedded filesystem with multi-theme support
+engine, err := template.NewEngineWithEmbedFS(&tmplFS, "templates", 
+    template.DefaultLoadTemplateWithEmbedFS, funcMap,
+    template.EnableMultiTheme(true),
+    template.DefaultTheme("default"),
+)
+if err != nil {
+    log.Fatal(err)
+}
+engine.Init()
+```
+
+### Engine Methods
+
+#### Core Rendering Methods (Unchanged)
+```go
+// Initialize the engine (required)
+engine.Init()
+
+// Rendering methods - identical signatures
+err := engine.RenderPage(w, "page-name", data)
+err := engine.RenderSingle(w, "single-name", data)
+err := engine.RenderError(w, "error-code", data)
+
+// Development features
+err := engine.Watching()  // Enable hot reloading
+engine.Close()           // Cleanup resources
+```
+
+#### Theme Management Methods (New)
+```go
+// Get available themes
+themes := engine.GetAvailableThemes()
+// Returns: []string{"default", "dark", "colorful"}
+
+// Get current active theme
+current := engine.GetCurrentTheme()
+// Returns: "default"
+
+// Switch theme at runtime
+err := engine.SwitchTheme("dark")
+if err != nil {
+    log.Printf("Theme switch failed: %v", err)
+}
+
+// Check if theme exists
+exists := engine.ThemeExists("dark")
+// Returns: true/false
+```
+
+### Configuration Options
+
+#### Backward Compatible Options
+```go
+// All existing options work unchanged
+template.GlobalConstant(map[string]interface{}{
+    "siteName": "My Website",
+    "version":  "1.0.0",
+})
+
+template.GlobalVariable(map[string]interface{}{
+    "year": time.Now().Year(),
+})
+```
+
+#### New Multi-Theme Options
+```go
+// Enable multi-theme mode (optional)
+template.EnableMultiTheme(true)
+
+// Set default theme (optional)
+template.DefaultTheme("theme-name")
+
+// Set initial theme (deprecated - use SwitchTheme instead)
+template.Theme("theme-name")
+```
+
+## Split Template Implementation
+
+### Template File Organization
+Split templates allow better code organization by separating concerns:
+
+#### Page Template Structure
+```
+pages/posts/list/
+├── header.tmpl    # Page head, CSS, meta tags
+├── content.tmpl   # Main page content
+└── script.tmpl    # JavaScript code
+```
+
+#### Singles Template Structure
+```
+singles/login/
+├── header.tmpl    # Page head and styles
+├── content.tmpl   # Login form content
+├── style.tmpl     # CSS styles
+└── script.tmpl    # JavaScript logic
+```
+
+#### Errors Template Structure
+```
+errors/404/
+├── header.tmpl    # Error page head
+├── content.tmpl   # Error message content
+├── style.tmpl     # Error page styles
+└── script.tmpl    # Error handling scripts
+```
+
+### Define Blocks
+Each split template file must use the appropriate define block:
+
+#### header.tmpl
+```html
+{{ define "header" }}
+<title>{{ .title }} - {{ .constant.siteName }}</title>
+<meta name="description" content="{{ .description }}">
+<style>
+/* Theme-specific CSS styles */
+body { font-family: Arial, sans-serif; }
+.container { max-width: 1200px; margin: 0 auto; }
+</style>
+{{ end }}
+```
+
+#### content.tmpl
+```html
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+<div class="main-content">
+    {{ range .items }}
+    <article>
+        <h2>{{ .title }}</h2>
+        <p>{{ .summary }}</p>
+    </article>
+    {{ end }}
+</div>
+{{ end }}
+```
+
+#### script.tmpl
+```html
+{{ define "script" }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Theme-specific JavaScript logic
+    console.log('Current theme: {{ .currentTheme }}');
+    
+    // Interactive features
+    initializeThemeFeatures();
+});
+
+function initializeThemeFeatures() {
+    // Theme-specific functionality
+}
+</script>
+{{ end }}
+```
+
+### Layout Integration
+Layout templates must include all define blocks:
+
+#### Main Layout (layout.tmpl)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{ template "header" . }}
+</head>
+<body>
+    <header>
+        <nav><!-- Navigation --></nav>
+    </header>
+    <main>
+        {{ template "content" . }}
+    </main>
+    <footer>
+        <p>&copy; {{ .variable.year }} {{ .constant.siteName }}</p>
+    </footer>
+    {{ template "script" . }}
+</body>
+</html>
+```
+
+#### Specialized Layouts
+```html
+<!-- singles layout (single.tmpl) -->
+<!DOCTYPE html>
+<html>
+<head>
+    {{ template "header" . }}
+    {{ template "style" . }}
+</head>
+<body>
+    {{ template "content" . }}
+    {{ template "script" . }}
+</body>
+</html>
+
+<!-- error layout (error.tmpl) -->
+<!DOCTYPE html>
+<html>
+<head>
+    {{ template "header" . }}
+    {{ template "style" . }}
+</head>
+<body class="error-page">
+    {{ template "content" . }}
+    {{ template "script" . }}
+</body>
+</html>
+```
+
+### Backward Compatibility
+The system supports both split and monolithic templates:
+
+#### Traditional Monolithic Template
+```html
+<!-- pages/posts/list.tmpl -->
+{{ define "header" }}<title>Posts</title>{{ end }}
+{{ define "content" }}
+<h1>Posts</h1>
+<div>Content here...</div>
+{{ end }}
+```
+
+#### Split Template Alternative
+```
+pages/posts/list/
+├── header.tmpl  # {{ define "header" }}<title>Posts</title>{{ end }}
+├── content.tmpl # {{ define "content" }}<h1>Posts</h1>...{{ end }}
+└── script.tmpl  # {{ define "script" }}...{{ end }}
+```
+
+Both approaches work identically - the system automatically detects and loads the appropriate structure.
+
+## Theme Configuration
+
+### theme.json Structure
+Each theme can include a configuration file describing its metadata:
+
+```json
+{
+    "name": "theme-name",
+    "displayName": "Theme Display Name",
+    "description": "Detailed theme description",
+    "version": "1.0.0",
+    "author": "Author Name",
+    "tags": ["tag1", "tag2", "responsive"],
+    "custom": {
+        "primaryColor": "#2c3e50",
+        "accentColor": "#3498db",
+        "backgroundColor": "#ffffff",
+        "features": ["dark-mode", "animations"],
+        "targetAudience": "business"
+    }
+}
+```
+
+### Theme Configuration Examples
+
+#### Default Theme
+```json
+{
+    "name": "default",
+    "displayName": "默认主题",
+    "description": "简洁的默认主题，适合日常使用",
+    "version": "1.0.0",
+    "author": "开发团队",
+    "tags": ["default", "clean", "simple"],
+    "custom": {
+        "primaryColor": "#2c3e50",
+        "accentColor": "#3498db",
+        "backgroundColor": "#ffffff"
+    }
+}
+```
+
+#### Dark Theme
+```json
+{
+    "name": "dark",
+    "displayName": "深色主题",
+    "description": "深色背景，护眼设计",
+    "version": "1.0.0",
+    "author": "开发团队",
+    "tags": ["dark", "night", "professional"],
+    "custom": {
+        "primaryColor": "#1a1a1a",
+        "accentColor": "#bb86fc",
+        "backgroundColor": "#121212"
+    }
+}
+```
+
+### Accessing Theme Configuration
+```go
+// In template functions or handlers
+themeConfig := engine.GetThemeMetadata("dark")
+if themeConfig != nil {
+    primaryColor := themeConfig.Custom["primaryColor"]
+    features := themeConfig.Custom["features"]
+}
+
+// In templates
+{{ .themeConfig.displayName }}
+{{ .themeConfig.custom.primaryColor }}
+```
+
+## Development Guidelines
+
+### Creating New Themes
+
+#### Step 1: Create Theme Directory Structure
+```bash
+mkdir -p templates/my-theme/{layouts,pages,singles,errors,partials}
+```
+
+#### Step 2: Copy Base Theme Templates
+```bash
+# Copy from existing theme as starting point
+cp -r templates/default/* templates/my-theme/
+```
+
+#### Step 3: Customize Theme Templates
+```bash
+# Edit theme-specific styles and content
+vim templates/my-theme/layouts/layout.tmpl
+vim templates/my-theme/pages/home/header.tmpl
+```
+
+#### Step 4: Create Theme Configuration
+```bash
+# Create theme.json
+cat > templates/my-theme/theme.json << EOF
+{
+    "name": "my-theme",
+    "displayName": "My Custom Theme",
+    "description": "A custom theme for my application",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "tags": ["custom", "unique"],
+    "custom": {
+        "primaryColor": "#your-color"
+    }
+}
+EOF
+```
+
+#### Step 5: Test Theme Functionality
+```go
+// Test theme switching
+err := engine.SwitchTheme("my-theme")
+if err != nil {
+    log.Printf("Theme switch failed: %v", err)
+}
+
+// Verify theme is available
+themes := engine.GetAvailableThemes()
+fmt.Printf("Available themes: %v\n", themes)
+```
+
+### Split Template Best Practices
+
+#### 1. Separation of Concerns
+- **header.tmpl**: Only page metadata, title, and CSS
+- **content.tmpl**: Only HTML structure and content
+- **script.tmpl**: Only JavaScript logic and interactions
+- **style.tmpl**: Only CSS styles (for singles/errors)
+
+#### 2. Consistency Across Themes
+```bash
+# Maintain same file structure across all themes
+templates/
+├── default/
+│   └── pages/posts/list/
+│       ├── header.tmpl
+│       ├── content.tmpl
+│       └── script.tmpl
+├── dark/
+│   └── pages/posts/list/
+│       ├── header.tmpl    # Same structure
+│       ├── content.tmpl   # Same structure
+│       └── script.tmpl    # Same structure
+└── colorful/
+    └── pages/posts/list/
+        ├── header.tmpl    # Same structure
+        ├── content.tmpl   # Same structure
+        └── script.tmpl    # Same structure
+```
+
+#### 3. Template Independence
+```html
+<!-- Avoid dependencies between template files -->
+<!-- BAD: content.tmpl depending on script.tmpl -->
+{{ define "content" }}
+<div id="dynamic-content">
+    <!-- This assumes script.tmpl will handle #dynamic-content -->
+</div>
+{{ end }}
+
+<!-- GOOD: self-contained content -->
+{{ define "content" }}
+<div class="posts-list">
+    {{ range .posts }}
+    <article>{{ .title }}</article>
+    {{ end }}
+</div>
+{{ end }}
+```
+
+#### 4. Theme Differentiation
+```html
+<!-- Each theme can have unique behavior -->
+<!-- default/pages/home/script.tmpl -->
+{{ define "script" }}
+<script>
+// Simple, clean interactions
+document.addEventListener('click', handleClick);
+</script>
+{{ end }}
+
+<!-- colorful/pages/home/script.tmpl -->
+{{ define "script" }}
+<script>
+// Rich, animated interactions
+document.addEventListener('click', handleClickWithAnimation);
+initializeParticleEffects();
+</script>
+{{ end }}
+```
+
+### Testing Themes
+
+#### Unit Testing
+```go
+func TestThemeRendering(t *testing.T) {
+    engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, nil,
+        template.EnableMultiTheme(true),
+    )
+    require.NoError(t, err)
+    engine.Init()
+
+    // Test each theme
+    themes := engine.GetAvailableThemes()
+    for _, theme := range themes {
+        t.Run(theme, func(t *testing.T) {
+            err := engine.SwitchTheme(theme)
+            require.NoError(t, err)
+
+            var buf bytes.Buffer
+            err = engine.RenderPage(&buf, "home", template.H{
+                "title": "Test Page",
+            })
+            require.NoError(t, err)
+            assert.Contains(t, buf.String(), "Test Page")
+        })
+    }
+}
+```
+
+#### Integration Testing
+```go
+func TestThemeSwitchingInWebApp(t *testing.T) {
+    // Test theme switching via HTTP endpoints
+    server := httptest.NewServer(createHandler())
+    defer server.Close()
+
+    // Test theme switch
+    resp, err := http.Post(server.URL+"/switch-theme", 
+        "application/x-www-form-urlencoded",
+        strings.NewReader("theme=dark"))
+    require.NoError(t, err)
+    assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+```
+
+#### Performance Testing
+```go
+func BenchmarkThemeSwitching(b *testing.B) {
+    engine := setupEngine()
+    themes := []string{"default", "dark", "colorful"}
+    
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        theme := themes[i%len(themes)]
+        engine.SwitchTheme(theme)
+    }
+}
+```
+
+## Common Patterns
+
+### Custom Template Functions
+```go
+funcMap := template.FuncMap{
+    // Date formatting
+    "formatDate": func(t time.Time) string {
+        return t.Format("2006-01-02 15:04:05")
+    },
+    
+    // List creation
+    "list": func(items ...interface{}) []interface{} {
+        return items
+    },
+    
+    // Math operations
+    "mod": func(a, b int) int {
+        return a % b
+    },
+    
+    // Theme-aware functions
+    "themeAsset": func(path string) string {
+        currentTheme := engine.GetCurrentTheme()
+        return fmt.Sprintf("/assets/%s/%s", currentTheme, path)
+    },
+    
+    // Conditional rendering based on theme
+    "ifTheme": func(themeName string, content interface{}) interface{} {
+        if engine.GetCurrentTheme() == themeName {
+            return content
+        }
+        return ""
+    },
+}
+```
+
+### Theme Switching Handler
+```go
+func switchThemeHandler(w http.ResponseWriter, r *http.Request) {
+    themeName := r.FormValue("theme")
+    
+    // Validate theme exists
+    if !engine.ThemeExists(themeName) {
+        http.Error(w, "Theme not found", http.StatusBadRequest)
+        return
+    }
+    
+    // Switch theme
+    if err := engine.SwitchTheme(themeName); err != nil {
+        log.Printf("Theme switch failed: %v", err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    
+    // Store theme preference (optional)
+    http.SetCookie(w, &http.Cookie{
+        Name:  "theme",
+        Value: themeName,
+        Path:  "/",
+    })
+    
+    // Redirect back
+    http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
+}
+```
+
+### Theme Management API
+```go
+func themesAPIHandler(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case "GET":
+        // Get available themes
+        themes := engine.GetAvailableThemes()
+        current := engine.GetCurrentTheme()
+        
+        response := map[string]interface{}{
+            "themes":  themes,
+            "current": current,
+        }
+        
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(response)
+        
+    case "POST":
+        // Switch theme
+        var req struct {
+            Theme string `json:"theme"`
+        }
+        
+        if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+            http.Error(w, "Invalid JSON", http.StatusBadRequest)
+            return
+        }
+        
+        if err := engine.SwitchTheme(req.Theme); err != nil {
+            http.Error(w, err.Error(), http.StatusBadRequest)
+            return
+        }
+        
+        w.WriteHeader(http.StatusOK)
+    }
+}
+```
+
+### Data Structure for Templates
+```go
+// Standard template data structure
+data := template.H{
+    "title":        "Page Title",
+    "currentTheme": engine.GetCurrentTheme(),
+    "content":      "Page content",
+    "posts":        []Post{...},
+    
+    // Theme-specific data
+    "themeConfig": engine.GetThemeMetadata(engine.GetCurrentTheme()),
+    
+    // Global constants (available in all templates)
+    "constant": map[string]interface{}{
+        "siteName": "My Website",
+        "version":  "2.0.0",
+    },
+    
+    // Global variables (can change)
+    "variable": map[string]interface{}{
+        "year": time.Now().Year(),
+        "user": getCurrentUser(r),
+    },
+}
+```
+
+### Middleware for Theme Management
+```go
+func themeMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Check for theme preference in cookie
+        if cookie, err := r.Cookie("theme"); err == nil {
+            if engine.ThemeExists(cookie.Value) {
+                engine.SwitchTheme(cookie.Value)
+            }
+        }
+        
+        // Check for theme parameter in URL
+        if theme := r.URL.Query().Get("theme"); theme != "" {
+            if engine.ThemeExists(theme) {
+                engine.SwitchTheme(theme)
+                // Set cookie for future requests
+                http.SetCookie(w, &http.Cookie{
+                    Name:  "theme",
+                    Value: theme,
+                    Path:  "/",
+                })
+            }
+        }
+        
+        next.ServeHTTP(w, r)
+    })
+}
+```
+
+### Error Handling Patterns
+```go
+func renderWithFallback(w http.ResponseWriter, templateName string, data interface{}) {
+    err := engine.RenderPage(w, templateName, data)
+    if err != nil {
+        log.Printf("Template rendering failed: %v", err)
+        
+        // Try fallback theme
+        currentTheme := engine.GetCurrentTheme()
+        if currentTheme != "default" {
+            log.Printf("Trying fallback theme: default")
+            if switchErr := engine.SwitchTheme("default"); switchErr == nil {
+                if fallbackErr := engine.RenderPage(w, templateName, data); fallbackErr == nil {
+                    return
+                }
+                // Switch back to original theme
+                engine.SwitchTheme(currentTheme)
+            }
+        }
+        
+        // Final fallback - render error page
+        engine.RenderError(w, "500", template.H{
+            "error": "Template rendering failed",
+        })
+    }
+}
+```
+
+## Error Handling
+
+### Common Errors
+- Theme not found: Verify theme directory exists and has required structure
+- Template parsing errors: Check template syntax and define blocks
+- Missing template files: Ensure all required templates exist in theme
+
+### Debugging
+- Enable verbose logging
+- Check theme discovery results
+- Validate template compilation
+- Monitor theme switching operations
+
+## Performance Considerations
+
+- Templates are compiled once per theme
+- Only active theme templates are loaded into memory
+- Hot reloading is for development only
+- Use embedded filesystem for production deployments
+
+## Backward Compatibility
+
+### Complete Compatibility Guarantee
+
+The multi-theme feature is designed with **progressive enhancement** principles, ensuring existing projects work without any modifications:
+
+#### API Compatibility
+- All existing method signatures remain unchanged
+- `NewEngine()`, `RenderPage()`, `RenderSingle()`, `RenderError()` work exactly as before
+- Configuration options are fully backward compatible
+- Error handling behavior is preserved
+
+#### Directory Structure Compatibility
+- Traditional single-theme structure continues to work
+- Automatic mode detection (legacy vs multi-theme)
+- Mixed mode support (traditional + theme directories)
+
+#### Performance Compatibility
+- Legacy mode performance identical to original version
+- Multi-theme features only loaded when needed
+- Memory usage patterns preserved
+
+#### Migration Path
+```go
+// Zero-modification upgrade
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap)
+// Identical behavior, no changes required
+
+// Progressive multi-theme enablement
+engine, err := template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap,
+    template.EnableMultiTheme(true), // Optional new feature
+)
+```
+
+### From Single Theme to Multi-Theme
+1. Move existing templates to `templates/default/` directory
+2. Add `template.EnableMultiTheme(true)` option
+3. Update initialization code to use `SwitchTheme()` instead of `Theme()` option
+4. Test backward compatibility
+
+### To Split Templates
+1. Identify separable components (CSS, content, JS)
+2. Create separate .tmpl files with appropriate define blocks
+3. Update layout template to include all blocks
+4. Test rendering functionality
+
+## Production Deployment
+
+### Docker Integration
+```dockerfile
+# Multi-stage build for embedded themes
+FROM golang:1.21-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o app .
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app/app .
+COPY --from=builder /app/templates ./templates
+CMD ["./app"]
+```
+
+### Environment Configuration
+```go
+func setupProductionEngine() (*template.Engine, error) {
+    var engine *template.Engine
+    var err error
+    
+    if os.Getenv("USE_EMBEDDED_TEMPLATES") == "true" {
+        // Production: use embedded templates
+        engine, err = template.NewEngineWithEmbedFS(&tmplFS, "templates", 
+            template.DefaultLoadTemplateWithEmbedFS, funcMap,
+            template.EnableMultiTheme(true),
+            template.DefaultTheme(os.Getenv("DEFAULT_THEME")),
+        )
+    } else {
+        // Development: use file system
+        engine, err = template.NewEngine("./templates", template.DefaultLoadTemplate, funcMap,
+            template.EnableMultiTheme(true),
+            template.DefaultTheme("default"),
+        )
+    }
+    
+    if err != nil {
+        return nil, err
+    }
+    
+    engine.Init()
+    
+    // Enable hot reloading in development
+    if os.Getenv("ENV") == "development" {
+        go func() {
+            if err := engine.Watching(); err != nil {
+                log.Printf("Hot reloading failed: %v", err)
+            }
+        }()
+    }
+    
+    return engine, nil
+}
+```
+
+### Health Checks
+```go
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+    health := map[string]interface{}{
+        "status": "ok",
+        "themes": engine.GetAvailableThemes(),
+        "current_theme": engine.GetCurrentTheme(),
+        "timestamp": time.Now().Unix(),
+    }
+    
+    // Test template rendering
+    var buf bytes.Buffer
+    testData := template.H{"title": "Health Check"}
+    if err := engine.RenderPage(&buf, "health", testData); err != nil {
+        health["status"] = "error"
+        health["template_error"] = err.Error()
+        w.WriteHeader(http.StatusInternalServerError)
+    }
+    
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(health)
+}
+```
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### 1. Theme Not Found
+```bash
+# Error: theme error [mytheme]: theme not found
+# Solution: Check theme directory structure
+ls -la templates/mytheme/
+# Ensure required directories exist: layouts, pages, singles, errors
+```
+
+#### 2. Template Parsing Errors
+```bash
+# Error: template: layout.tmpl:10: unexpected "}" in command
+# Solution: Check template syntax
+go run -tags debug main.go  # Enable debug mode
+```
+
+#### 3. Split Template Issues
+```bash
+# Error: template layout.tmpl:pages/sample not exists
+# Solution: Verify split template structure
+ls -la templates/default/pages/sample/
+# Should contain: header.tmpl, content.tmpl, script.tmpl
+```
+
+#### 4. Performance Issues
+```go
+// Monitor theme switching performance
+func monitorThemeSwitching() {
+    start := time.Now()
+    err := engine.SwitchTheme("new-theme")
+    duration := time.Since(start)
+    
+    if duration > 100*time.Millisecond {
+        log.Printf("Slow theme switch: %v", duration)
+    }
+}
+```
+
+### Debug Tools
+
+#### Theme Inspector
+```go
+func inspectTheme(themeName string) {
+    fmt.Printf("=== Theme Inspection: %s ===\n", themeName)
+    
+    if !engine.ThemeExists(themeName) {
+        fmt.Printf("❌ Theme does not exist\n")
+        return
+    }
+    
+    // Switch to theme for inspection
+    originalTheme := engine.GetCurrentTheme()
+    defer engine.SwitchTheme(originalTheme)
+    
+    if err := engine.SwitchTheme(themeName); err != nil {
+        fmt.Printf("❌ Failed to switch to theme: %v\n", err)
+        return
+    }
+    
+    // Check theme metadata
+    if metadata := engine.GetThemeMetadata(themeName); metadata != nil {
+        fmt.Printf("✅ Theme metadata found\n")
+        fmt.Printf("   Display Name: %s\n", metadata.DisplayName)
+        fmt.Printf("   Version: %s\n", metadata.Version)
+        fmt.Printf("   Author: %s\n", metadata.Author)
+    }
+    
+    // Test template rendering
+    testTemplates := []string{"home", "login", "404"}
+    for _, tmpl := range testTemplates {
+        var buf bytes.Buffer
+        if err := engine.RenderPage(&buf, tmpl, template.H{"title": "Test"}); err != nil {
+            fmt.Printf("❌ Template %s: %v\n", tmpl, err)
+        } else {
+            fmt.Printf("✅ Template %s: OK\n", tmpl)
+        }
+    }
+}
+```
+
+### Production Monitoring
+
+#### Health Check Implementation
+```go
+func setupHealthChecks() {
+    http.HandleFunc("/health/themes", func(w http.ResponseWriter, r *http.Request) {
+        health := map[string]interface{}{
+            "status":        "ok",
+            "themes":        engine.GetAvailableThemes(),
+            "current_theme": engine.GetCurrentTheme(),
+            "timestamp":     time.Now().Unix(),
+        }
+        
+        // Test critical template rendering
+        var buf bytes.Buffer
+        testData := template.H{"title": "Health Check"}
+        if err := engine.RenderPage(&buf, "health", testData); err != nil {
+            health["status"] = "degraded"
+            health["template_error"] = err.Error()
+            w.WriteHeader(http.StatusServiceUnavailable)
+        }
+        
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(health)
+    })
+}
+```
+
+#### Metrics Collection
+```go
+type ThemeMetrics struct {
+    SwitchCount    int64
+    RenderCount    int64
+    ErrorCount     int64
+    LastSwitchTime time.Time
+    mutex          sync.RWMutex
+}
+
+func (tm *ThemeMetrics) RecordSwitch() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.SwitchCount++
+    tm.LastSwitchTime = time.Now()
+}
+
+func (tm *ThemeMetrics) RecordRender() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.RenderCount++
+}
+
+func (tm *ThemeMetrics) RecordError() {
+    tm.mutex.Lock()
+    defer tm.mutex.Unlock()
+    tm.ErrorCount++
+}
+```
+
+### Advanced Integration Patterns
+
+#### Microservices Theme Coordination
+```go
+// Theme state synchronization across services
+type ThemeCoordinator struct {
+    redis  *redis.Client
+    engine *template.Engine
+}
+
+func (tc *ThemeCoordinator) SyncTheme(themeName string) error {
+    // Update local engine
+    if err := tc.engine.SwitchTheme(themeName); err != nil {
+        return err
+    }
+    
+    // Broadcast to other services
+    return tc.redis.Publish("theme:switch", themeName).Err()
+}
+
+func (tc *ThemeCoordinator) ListenForThemeChanges() {
+    pubsub := tc.redis.Subscribe("theme:switch")
+    defer pubsub.Close()
+    
+    for msg := range pubsub.Channel() {
+        themeName := msg.Payload
+        if tc.engine.ThemeExists(themeName) {
+            tc.engine.SwitchTheme(themeName)
+            log.Printf("Synchronized to theme: %s", themeName)
+        }
+    }
+}
+```
+
+#### CDN Integration for Theme Assets
+```go
+func setupThemeAssetCDN() {
+    http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+        currentTheme := engine.GetCurrentTheme()
+        assetPath := strings.TrimPrefix(r.URL.Path, "/assets/")
+        
+        // Construct theme-specific asset URL
+        cdnURL := fmt.Sprintf("https://cdn.example.com/themes/%s/%s", 
+            currentTheme, assetPath)
+        
+        // Set cache headers
+        w.Header().Set("Cache-Control", "public, max-age=3600")
+        w.Header().Set("X-Theme", currentTheme)
+        
+        // Redirect to CDN
+        http.Redirect(w, r, cdnURL, http.StatusMovedPermanently)
+    })
+}
+```
+
+### Security Considerations
+
+#### Theme Validation and Sanitization
+```go
+func validateThemeInput(themeName string) error {
+    // Prevent path traversal
+    if strings.Contains(themeName, "..") || strings.Contains(themeName, "/") {
+        return fmt.Errorf("invalid theme name: contains illegal characters")
+    }
+    
+    // Whitelist allowed characters
+    matched, _ := regexp.MatchString("^[a-zA-Z0-9_-]+$", themeName)
+    if !matched {
+        return fmt.Errorf("invalid theme name: only alphanumeric, underscore, and dash allowed")
+    }
+    
+    // Check length limits
+    if len(themeName) > 50 {
+        return fmt.Errorf("theme name too long: maximum 50 characters")
+    }
+    
+    return nil
+}
+```
+
+#### Rate Limiting for Theme Switches
+```go
+type ThemeRateLimiter struct {
+    requests map[string][]time.Time
+    mutex    sync.RWMutex
+    limit    int
+    window   time.Duration
+}
+
+func (trl *ThemeRateLimiter) Allow(clientID string) bool {
+    trl.mutex.Lock()
+    defer trl.mutex.Unlock()
+    
+    now := time.Now()
+    cutoff := now.Add(-trl.window)
+    
+    // Clean old requests
+    requests := trl.requests[clientID]
+    validRequests := []time.Time{}
+    for _, req := range requests {
+        if req.After(cutoff) {
+            validRequests = append(validRequests, req)
+        }
+    }
+    
+    // Check limit
+    if len(validRequests) >= trl.limit {
+        return false
+    }
+    
+    // Add current request
+    validRequests = append(validRequests, now)
+    trl.requests[clientID] = validRequests
+    
+    return true
+}
+```
+
+This comprehensive documentation provides AI assistants with detailed guidance for working with this template engine codebase, including advanced patterns, troubleshooting, production deployment strategies, monitoring, security considerations, and microservices integration patterns.

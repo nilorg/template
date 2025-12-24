@@ -1,0 +1,28 @@
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
+{{define "content"}}
+<article style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h1 style="color: #2c3e50; margin-bottom: 1rem;">{{ .title }}</h1>
+    <div style="color: #666; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee;">
+        <span>作者: {{ .author }}</span> | 
+        <span>发布时间: {{ formatDate .createdAt }}</span>
+    </div>
+    <div style="line-height: 1.8; color: #333;">
+        {{ .content }}
+    </div>
+</article>
+<div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <p><strong>主题说明:</strong> 默认主题的文章详情页，注重内容的可读性。</p>
+</div>
+<div style="margin-top: 1rem;">
+    <a href="/posts" style="color: #3498db; text-decoration: none;">&larr; 返回文章列表</a>
+</div>
+{{end}}
+
+{{ define "script" }}
+<script>
+// 文章详情页面的JavaScript功能
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('文章详情页面已加载完成 - 默认主题');
+});
+</script>
+{{ end }}

@@ -1,0 +1,14 @@
+{
+    "name": "dark",
+    "displayName": "深色主题",
+    "description": "深色主题，适合夜间浏览，保护眼睛",
+    "version": "1.0.0",
+    "author": "开发团队",
+    "tags": ["dark", "night", "modern"],
+    "custom": {
+        "primaryColor": "#1a1a1a",
+        "accentColor": "#bb86fc",
+        "backgroundColor": "#121212",
+        "textColor": "#ffffff"
+    }
+}

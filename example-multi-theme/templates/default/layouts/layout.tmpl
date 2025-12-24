@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {{ template "header" . }}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #ffffff; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { background: #2c3e50; color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        header .theme-info { font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem; }
+        header nav { margin-top: 0.5rem; }
+        header nav a { color: #ecf0f1; text-decoration: none; margin-right: 1.5rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        header nav a:hover { background: rgba(255,255,255,0.1); }
+        main { padding: 2rem 0; min-height: calc(100vh - 200px); }
+        footer { background: #34495e; color: #ecf0f1; padding: 1.5rem 0; text-align: center; }
+        .theme-badge { display: inline-block; background: #3498db; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-left: 0.5rem; }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>{{ .constant.siteName }} <span class="theme-badge">{{ .currentTheme }}</span></h1>
+            <div class="theme-info">当前主题: 默认主题 - 简洁清爽的设计风格</div>
+            <nav>
+                <a href="/">首页</a>
+                <a href="/posts">文章</a>
+                <a href="/login">登录</a>
+                <a href="/themes">主题管理</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            {{ template "content" . }}
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; {{ .variable.year }} {{ .constant.siteName }} - v{{ .constant.version }}</p>
+            <p>当前主题: {{ .currentTheme }}</p>
+        </div>
+    </footer>
+    {{ template "script" . }}
+</body>
+
+</html>

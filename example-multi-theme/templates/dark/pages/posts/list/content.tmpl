@@ -1,0 +1,16 @@
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+<div class="posts-list">
+    {{ range .posts }}
+    <article style="border: 1px solid #333; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; background: #1e1e1e; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+        <h2 style="margin-bottom: 0.5rem;"><a href="/posts/detail?id={{ .id }}" style="color: #bb86fc; text-decoration: none;">{{ .title }}</a></h2>
+        <p style="color: #b0b0b0; margin-bottom: 1rem;">{{ .summary }}</p>
+        <small style="color: #888;">发布于: {{ formatDate .createdAt }}</small>
+    </article>
+    {{ end }}
+</div>
+<div style="margin-top: 2rem; padding: 1rem; background: #2d2d2d; border-radius: 8px; border-left: 4px solid #03dac6;">
+    <p><strong style="color: #03dac6;">主题说明:</strong> 这是深色主题的文章列表页面，适合夜间浏览，减少眼部疲劳。</p>
+    <p><strong style="color: #03dac6;">模板结构:</strong> 此页面使用了分离的模板文件：header.tmpl（深色样式）、content.tmpl（主要内容）、script.tmpl（深色主题JavaScript）。</p>
+</div>
+{{ end }}

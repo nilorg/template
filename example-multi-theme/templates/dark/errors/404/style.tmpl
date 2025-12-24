@@ -1,0 +1,78 @@
+{{ define "style" }}
+<style>
+    body { 
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        text-align: center; 
+        margin: 0;
+        padding: 0;
+    }
+    .error-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .error-box { 
+        padding: 3rem; 
+        background: #1e1e1e; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+        max-width: 500px;
+        width: 90%;
+        border: 1px solid #333;
+    }
+    .error-code { 
+        font-size: 6rem; 
+        font-weight: bold; 
+        color: #bb86fc; 
+        line-height: 1; 
+        margin-bottom: 1rem; 
+        text-shadow: 0 0 20px rgba(187, 134, 252, 0.5);
+    }
+    .error-message { 
+        font-size: 1.5rem; 
+        color: #b0b0b0; 
+        margin: 1rem 0; 
+    }
+    .error-path { 
+        color: #888; 
+        margin-bottom: 2rem; 
+        font-family: monospace; 
+        background: #2a2a2a; 
+        padding: 0.5rem; 
+        border-radius: 4px; 
+        word-break: break-all;
+        border: 1px solid #333;
+    }
+    .theme-info { 
+        color: #b0b0b0; 
+        margin-bottom: 2rem; 
+        font-size: 0.9rem; 
+    }
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn { 
+        display: inline-block; 
+        padding: 0.8rem 2rem; 
+        background: linear-gradient(135deg, #bb86fc, #9c27b0); 
+        color: #121212; 
+        text-decoration: none; 
+        border-radius: 6px; 
+        transition: transform 0.2s; 
+        font-weight: bold;
+    }
+    .btn:hover { 
+        transform: translateY(-1px); 
+        box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
+    }
+</style>
+{{ end }}

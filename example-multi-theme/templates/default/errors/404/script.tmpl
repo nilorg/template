@@ -1,0 +1,49 @@
+{{ define "script" }}
+<script>
+// 404错误页面交互脚本
+document.addEventListener('DOMContentLoaded', function() {
+    const errorCode = document.querySelector('.error-code');
+    const buttons = document.querySelectorAll('.btn');
+    
+    // 错误代码动画效果
+    let clickCount = 0;
+    errorCode.addEventListener('click', function() {
+        clickCount++;
+        if (clickCount === 1) {
+            this.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                this.style.animation = 'none';
+            }, 500);
+        } else if (clickCount === 3) {
+            this.textContent = '🤔';
+            setTimeout(() => {
+                this.textContent = '404';
+                clickCount = 0;
+            }, 2000);
+        }
+    });
+    
+    // 按钮悬浮效果
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 5px 15px rgba(52, 152, 219, 0.3)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.boxShadow = 'none';
+        });
+    });
+});
+
+// 添加CSS动画
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{{ end }}

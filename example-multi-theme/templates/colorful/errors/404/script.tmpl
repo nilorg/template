@@ -1,0 +1,97 @@
+{{ define "script" }}
+<script>
+// 彩色主题404错误页面交互脚本
+document.addEventListener('DOMContentLoaded', function() {
+    const errorCode = document.querySelector('.error-code');
+    const errorBox = document.querySelector('.error-box');
+    const buttons = document.querySelectorAll('.btn');
+    
+    // 彩色主题特有的错误代码彩虹效果
+    let clickCount = 0;
+    errorCode.addEventListener('click', function() {
+        clickCount++;
+        if (clickCount === 1) {
+            this.style.animation = 'rainbow 2s ease-in-out, bounce 2s ease-in-out infinite';
+            setTimeout(() => {
+                this.style.animation = 'bounce 2s ease-in-out infinite';
+            }, 2000);
+        } else if (clickCount === 3) {
+            this.textContent = '🌈✨🎉';
+            setTimeout(() => {
+                this.textContent = '4️⃣0️⃣4️⃣';
+                clickCount = 0;
+            }, 3000);
+        }
+    });
+    
+    // 错误框悬浮效果
+    errorBox.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.02) rotate(1deg)';
+    });
+    
+    errorBox.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1) rotate(0deg)';
+    });
+    
+    // 彩色主题按钮效果
+    buttons.forEach((button, index) => {
+        button.addEventListener('mouseenter', function() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+            const color = colors[index % colors.length];
+            this.style.boxShadow = `0 8px 20px ${color}40`;
+            this.style.transform = 'translateY(-5px) scale(1.05)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.boxShadow = 'none';
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // 添加随机彩色粒子效果
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: ${['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)]};
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            left: ${Math.random() * window.innerWidth}px;
+            top: ${window.innerHeight}px;
+            animation: float 3s ease-out forwards;
+        `;
+        document.body.appendChild(particle);
+        
+        setTimeout(() => {
+            particle.remove();
+        }, 3000);
+    }
+    
+    // 每2秒创建一个粒子
+    setInterval(createParticle, 2000);
+});
+
+// 添加彩色主题CSS动画
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes rainbow {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+    @keyframes float {
+        0% { 
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+        }
+        100% { 
+            transform: translateY(-100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{{ end }}

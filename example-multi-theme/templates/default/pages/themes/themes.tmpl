@@ -1,0 +1,48 @@
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
+{{define "content"}}
+<h1>{{ .title }}</h1>
+<div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+    <h2 style="color: #2c3e50; margin-bottom: 1rem;">当前主题: {{ .currentTheme }}</h2>
+    <p>您可以在下方选择不同的主题来改变网站的外观和风格。</p>
+</div>
+
+<div class="themes-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    {{ range .availableThemes }}
+    <div class="theme-card" style="border: 2px solid {{ if eq . $.currentTheme }}#3498db{{ else }}#ddd{{ end }}; padding: 1.5rem; border-radius: 8px; background: #fff;">
+        <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">{{ . }}</h3>
+        <p style="color: #666; margin-bottom: 1rem;">
+            {{ if eq . "default" }}简洁的默认主题，适合日常使用{{ end }}
+            {{ if eq . "dark" }}深色主题，适合夜间浏览{{ end }}
+            {{ if eq . "colorful" }}彩色主题，活泼有趣的设计{{ end }}
+        </p>
+        {{ if eq . $.currentTheme }}
+        <span style="background: #27ae60; color: white; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;">当前使用</span>
+        {{ else }}
+        <form method="POST" action="/switch-theme" style="display: inline;">
+            <input type="hidden" name="theme" value="{{ . }}">
+            <button type="submit" style="background: #3498db; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">切换到此主题</button>
+        </form>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+
+<div style="margin-top: 2rem; padding: 1rem; background: #e8f4f8; border-radius: 8px; border-left: 4px solid #3498db;">
+    <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">使用说明</h3>
+    <ul style="color: #666; padding-left: 1.5rem;">
+        <li>点击"切换到此主题"按钮即可立即切换主题</li>
+        <li>主题切换后会立即生效，无需刷新页面</li>
+        <li>每个主题都有独特的设计风格和配色方案</li>
+        <li>主题切换不会影响网站的功能和数据</li>
+    </ul>
+</div>
+{{end}}
+
+{{ define "script" }}
+<script>
+// 主题管理页面的JavaScript功能
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('主题管理页面已加载完成 - 默认主题');
+});
+</script>
+{{ end }}

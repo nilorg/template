@@ -1,0 +1,109 @@
+{{ define "style" }}
+<style>
+    body { 
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57); 
+        background-size: 400% 400%; 
+        animation: gradientShift 15s ease infinite; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        min-height: 100vh; 
+        text-align: center; 
+        margin: 0;
+        padding: 0;
+    }
+    @keyframes gradientShift { 
+        0% { background-position: 0% 50%; } 
+        50% { background-position: 100% 50%; } 
+        100% { background-position: 0% 50%; } 
+    }
+    .error-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+    .error-box { 
+        padding: 3rem; 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(15px); 
+        border-radius: 25px; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+        max-width: 500px;
+        width: 90%;
+        border: 3px solid transparent; 
+        background-clip: padding-box; 
+        position: relative;
+    }
+    .error-box::before { 
+        content: ''; 
+        position: absolute; 
+        top: -3px; 
+        left: -3px; 
+        right: -3px; 
+        bottom: -3px; 
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57); 
+        border-radius: 25px; 
+        z-index: -1; 
+    }
+    .error-code { 
+        font-size: 4rem; 
+        font-weight: bold; 
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+        line-height: 1; 
+        margin-bottom: 1rem; 
+        animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .error-message { 
+        font-size: 1.5rem; 
+        color: #666; 
+        margin: 1rem 0; 
+        font-weight: 600;
+    }
+    .error-path { 
+        color: #888; 
+        margin-bottom: 2rem; 
+        font-family: monospace; 
+        background: rgba(255,255,255,0.8); 
+        padding: 1rem; 
+        border-radius: 15px; 
+        word-break: break-all;
+        border: 2px solid #ddd;
+    }
+    .theme-info { 
+        color: #666; 
+        margin-bottom: 2rem; 
+        font-size: 1rem; 
+        font-weight: 500;
+    }
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn { 
+        display: inline-block; 
+        padding: 1rem 2rem; 
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4); 
+        color: white; 
+        text-decoration: none; 
+        border-radius: 15px; 
+        transition: all 0.3s; 
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .btn:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4); 
+    }
+</style>
+{{ end }}

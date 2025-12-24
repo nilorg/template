@@ -1,0 +1,18 @@
+{{ define "content" }}
+<h1>📝 {{ .title }}</h1>
+<div class="posts-list">
+    {{ $colors := (list "#ff6b6b" "#4ecdc4" "#45b7d1" "#96ceb4" "#feca57") }}
+    {{ range $index, $post := .posts }}
+    {{ $color := index $colors (mod $index 5) }}
+    <article style="border: 3px solid {{ $color }}; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 15px; background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%); box-shadow: 0 6px 20px rgba(0,0,0,0.15); transform: rotate(-1deg); transition: all 0.3s ease;">
+        <h2 style="margin-bottom: 0.5rem; color: {{ $color }}; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);"><a href="/posts/detail?id={{ .id }}" style="color: inherit; text-decoration: none;">🎨 {{ .title }}</a></h2>
+        <p style="color: #555; margin-bottom: 1rem; font-size: 1.1rem;">{{ .summary }}</p>
+        <small style="color: #777; background: {{ $color }}; color: white; padding: 0.2rem 0.5rem; border-radius: 10px;">📅 {{ formatDate .createdAt }}</small>
+    </article>
+    {{ end }}
+</div>
+<div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%); border-radius: 15px; border: 3px dashed #ff6b6b;">
+    <p><strong style="color: #e74c3c;">🎨 主题说明:</strong> 这是彩色主题的文章列表页面，充满活力和创意，适合年轻用户。</p>
+    <p><strong style="color: #e74c3c;">📁 模板结构:</strong> 此页面使用了分离的模板文件：header.tmpl（彩色样式）、content.tmpl（主要内容）、script.tmpl（动画效果）。</p>
+</div>
+{{ end }}

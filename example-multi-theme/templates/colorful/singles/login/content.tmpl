@@ -1,0 +1,23 @@
+{{ define "content" }}
+<div class="login-container">
+    <div class="login-box">
+        <h1>🔐 {{ .title }}</h1>
+        <div class="theme-info">🌈 当前主题: {{ .currentTheme }} (彩色主题)</div>
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">👤 用户名</label>
+                <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="password">🔒 密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码" required>
+            </div>
+            <button type="submit" class="btn">🚀 登录</button>
+        </form>
+        <div class="links">
+            <a href="/">🏠 返回首页</a>
+            <a href="/themes">🎨 主题管理</a>
+        </div>
+    </div>
+</div>
+{{ end }}

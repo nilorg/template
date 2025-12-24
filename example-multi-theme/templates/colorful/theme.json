@@ -1,0 +1,15 @@
+{
+    "name": "colorful",
+    "displayName": "彩色主题",
+    "description": "活泼有趣的彩色主题，充满活力的设计",
+    "version": "1.0.0",
+    "author": "开发团队",
+    "tags": ["colorful", "vibrant", "fun", "creative"],
+    "custom": {
+        "primaryColor": "#ff6b6b",
+        "secondaryColor": "#4ecdc4",
+        "accentColor": "#45b7d1",
+        "backgroundColor": "#f8f9fa",
+        "gradientColors": ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57"]
+    }
+}

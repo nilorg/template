@@ -1,0 +1,14 @@
+{{ define "content" }}
+<div class="error-container">
+    <div class="error-box">
+        <div class="error-code">4️⃣0️⃣4️⃣</div>
+        <div class="error-message">🚫 {{ .message }}</div>
+        <div class="error-path">📍 请求路径: {{ .path }}</div>
+        <div class="theme-info">🌈 当前主题: {{ .currentTheme }} (彩色主题)</div>
+        <div class="error-actions">
+            <a href="/" class="btn">🏠 返回首页</a>
+            <a href="/themes" class="btn">🎨 主题管理</a>
+        </div>
+    </div>
+</div>
+{{ end }}

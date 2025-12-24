@@ -1,0 +1,29 @@
+{{ define "header"}}<title>{{ .title }} - {{ .constant.siteName }}</title>{{ end }}
+{{define "content"}}
+<article style="background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8)); padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 3px solid transparent; background-clip: padding-box; position: relative;">
+    <div style="position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57); border-radius: 20px; z-index: -1;"></div>
+    <h1 style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1.5rem; font-size: 2.5rem;">📖 {{ .title }}</h1>
+    <div style="color: #666; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1)); border-radius: 10px; border-left: 4px solid #4ecdc4;">
+        <span style="color: #ff6b6b; font-weight: bold;">👤 作者: {{ .author }}</span> | 
+        <span style="color: #4ecdc4; font-weight: bold;">📅 发布时间: {{ formatDate .createdAt }}</span>
+    </div>
+    <div style="line-height: 1.8; color: #333; font-size: 1.1rem;">
+        {{ .content }}
+    </div>
+</article>
+<div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(69, 183, 209, 0.1), rgba(150, 206, 180, 0.1)); border-radius: 15px; border-left: 5px solid #45b7d1;">
+    <p style="color: #333; font-size: 1.1rem;"><strong style="color: #45b7d1;">🎨 主题说明:</strong> 彩色主题的文章详情页，使用渐变边框和彩色强调，让内容阅读更加愉悦。</p>
+</div>
+<div style="margin-top: 1.5rem;">
+    <a href="/posts" style="color: white; text-decoration: none; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); padding: 0.8rem 1.5rem; border-radius: 25px; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">← 返回文章列表</a>
+</div>
+{{end}}
+
+{{ define "script" }}
+<script>
+// 文章详情页面的JavaScript功能 - 彩色主题
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('文章详情页面已加载完成 - 彩色主题 🎨');
+});
+</script>
+{{ end }}
