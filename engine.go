@@ -465,15 +465,8 @@ func (en *Engine) SingleName(name string) string {
 
 // SingleNameWithOptions 单页（带选项）
 func (en *Engine) SingleNameWithOptions(name string, opts Options) string {
-	// 首先尝试新的分割模板格式（使用布局）
-	if en.multiThemeMode {
-		// 对于单页，使用single.tmpl布局
-		splitTemplateName := fmt.Sprintf("single.tmpl:singles/%s", name)
-		if en.HTMLRender.HasTemplate(splitTemplateName) {
-			return splitTemplateName
-		}
-	}
-	// 回退到传统格式
+	// 单页(singles)不使用布局，但在多主题模式下需要区分不同主题的单页
+	// 单页的核心设计理念：自包含的完整HTML页面，不依赖布局
 	return fmt.Sprintf("singles/%s.%s", name, opts.Suffix)
 }
 
